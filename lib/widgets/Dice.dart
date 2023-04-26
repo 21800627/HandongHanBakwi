@@ -3,18 +3,52 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class Dice extends StatefulWidget {
+  final double left;
+  final double top;
+
+  Dice({required this.left, required this.top});
+
   @override
   _DiceState createState() => _DiceState();
 }
 
-class _DiceState extends State<Dice> {
-  int _value = 1;
-  Offset _offset = Offset.zero;
+class _DiceState extends State<Dice>{
+  Offset position = Offset.zero;
+  final double boxSize = 50.0;
+  final double boundaryLeft = 0.0;
+  final double boundaryRight = 200.0;
+  final double boundaryTop = 0.0;
+  final double boundaryBottom = 200.0;
 
-  void _rollDice() {
+  int _value = 1;
+
+  // Set the boundaries for the box
+  void _handleDrragableCanceled(velocity, offset){
     setState(() {
+      double newLeft = offset.dx;
+      double newTop = offset.dy;
+
+      if (newLeft < boundaryLeft) {
+        newLeft = boundaryLeft;
+      } else if (newLeft > boundaryRight) {
+        newLeft = boundaryRight - boxSize;
+      }
+
+      if (newTop < boundaryTop) {
+        newTop = boundaryTop;
+      } else if (newTop > boundaryBottom) {
+        newTop = boundaryBottom - boxSize;
+      }
+
       _value = Random().nextInt(6) + 1;
+      position = Offset(newLeft, newTop);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    position = Offset(widget.left, widget.top);
   }
 
   @override
@@ -22,33 +56,18 @@ class _DiceState extends State<Dice> {
     return Stack(
       children: [
         Positioned(
-          top: _offset.dy,
-          left: _offset.dx,
+          left: position.dx,
+          top: position.dy,
           child: Draggable(
-            child: SizedBox(
-              height: 100,
-              child: Image.asset('assets/images/dice.png'),
-            ),
             feedback: SizedBox(
               height: 100,
-              child: Image.asset('assets/images/dice.png'),
+              child: Image.asset('assets/images/dicePick.png'),
             ),
             childWhenDragging: Container(),
-            onDraggableCanceled: (velocity, offset) {
-              setState(() {
-                _offset = offset;
-              });
-            },
-          ),
-        ),
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: TextButton(
-              onPressed: _rollDice,
-              child: Text('Roll the Dice'),
+            onDraggableCanceled: _handleDrragableCanceled,
+            child: SizedBox(
+              height: 50,
+              child: Image.asset('assets/images/dice$_value.png'),
             ),
           ),
         ),

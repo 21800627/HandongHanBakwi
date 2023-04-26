@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:handong_han_bakwi/widgets/QCard.dart';
-import 'package:handong_han_bakwi/widgets/Dice.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key, required this.title});
-
-  final String title;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<Home> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<Home>{
+class _HomeScreenState extends State<HomeScreen>{
   OverlayEntry? _overlayEntry;
 
   void _showOverlay(BuildContext context) {
@@ -21,12 +18,11 @@ class _HomePageState extends State<Home>{
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(
-              style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-              ),
+            OutlinedButton(
               onPressed: _hideOverlay,
-              child: Text('TextButton'),
+              child: const Icon(
+                Icons.close,
+              ),
             ),
             QCard(
               frontWidget: Container(
@@ -75,31 +71,30 @@ class _HomePageState extends State<Home>{
       // appBar: AppBar(
       //   title: Text(widget.title),
       // ),
-      body: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                width: 1,
-                color: Colors.orange,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              margin: const EdgeInsets.all(10.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/gameStart');
+                },
+                child: const Text('Show Dice'),
               ),
             ),
-            width: 250,
-            height: 250,
-            child: Dice(left: 0.0, top: 0.0)
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ElevatedButton(
+            Container(
+              margin: const EdgeInsets.all(10.0),
+              child: ElevatedButton(
                 onPressed: () {
                   _showOverlay(context);
                 },
                 child: const Text('Show Q-Card'),
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

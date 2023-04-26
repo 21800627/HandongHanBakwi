@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:handong_han_bakwi/src/BoardUI.dart';
 import 'package:handong_han_bakwi/src/HomeUI.dart';
 
 void main() {
@@ -20,11 +21,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Handong Han Bakwi',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const Home(title: 'Handong Han Bakwi~'),
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        '/': (context) => const HomeScreen(),
+        '/gameStart': (context) => const BoardScreen(),
+      },
     );
   }
 }

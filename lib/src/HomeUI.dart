@@ -76,21 +76,39 @@ class _HomeScreenState extends State<HomeScreen>{
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-              margin: const EdgeInsets.all(10.0),
+              margin: const EdgeInsets.all(5.0),
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/gameStart');
+                  Navigator.pushNamed(context, '/boardExample');
+                },
+                child: const Text('Show Board'),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/diceExample');
                 },
                 child: const Text('Show Dice'),
               ),
             ),
             Container(
-              margin: const EdgeInsets.all(10.0),
+              margin: const EdgeInsets.all(5.0),
               child: ElevatedButton(
                 onPressed: () {
                   _showOverlay(context);
                 },
                 child: const Text('Show Q-Card'),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/rankingExample');
+                },
+                child: const Text('Player Ranking'),
               ),
             ),
           ],

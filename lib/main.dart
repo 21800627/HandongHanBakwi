@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:handong_han_bakwi/src/BoardUI.dart';
+import 'package:handong_han_bakwi/src/DiceUI.dart';
 import 'package:handong_han_bakwi/src/HomeUI.dart';
+import 'package:handong_han_bakwi/src/RankingUI.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +31,9 @@ class MyApp extends StatelessWidget {
       routes: {
         // When navigating to the "/" route, build the FirstScreen widget.
         '/': (context) => const HomeScreen(),
-        '/gameStart': (context) => const BoardScreen(),
+        '/diceExample': (context) => const DiceScreen(),
+        '/boardExample': (context) => const BoardScreen(),
+        '/rankingExample': (context) => const RankingScreen(),
       },
     );
   }

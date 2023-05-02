@@ -6,6 +6,8 @@ class Player{
   int score=0;
   int step=0;
 
+  bool isOver=false;
+
   String name;
 
   Player({required this.index, this.name='', this.step=0, this.score=0});
@@ -13,10 +15,30 @@ class Player{
 
 class Game{
   int playerNum=0;
+  int currentPlayerIndex=0;
   int round=0;
   int totalStep=28;
+  List<Player> players=[];
 
   Game({this.round=0, this.playerNum=0, this.totalStep=28});
+
+  void generatePlayers(int num){
+    playerNum=num;
+    players = List<Player>.generate(playerNum, (i) => Player(index: i+1, name: (i+1).toString()));
+  }
+  void addPlayerScore(int diceValue) {
+    if(players[currentPlayerIndex].isOver){
+      currentPlayerIndex++;
+      addPlayerScore(diceValue);
+    }
+    else{
+      players[currentPlayerIndex].step = diceValue;
+      // check player
+      if(players[currentPlayerIndex].step >= totalStep){
+        players[currentPlayerIndex].isOver = true;
+      }
+    }
+  }
 }
 
 class RankingScreen extends StatefulWidget {
@@ -77,7 +99,7 @@ class _RankingScreenState extends State<RankingScreen> {
                     ),
                     onFieldSubmitted: (value) {
                       int num = int.tryParse(value) ?? 0;
-                      //_generatePlayer(num);
+                      // _generatePlayer(num);
                       game.round = num;
                       game.totalStep *= num;
                     },
@@ -95,6 +117,9 @@ class _RankingScreenState extends State<RankingScreen> {
                     onFieldSubmitted: (value) {
                       int num = int.tryParse(value) ?? 0;
                       _generatePlayer(num);
+                      // setState(() {
+                      //   game.generatePlayers(num);
+                      // });
                     },
                   ),
                 ),

@@ -8,7 +8,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>{
+class _HomeScreenState extends State<HomeScreen> {
   OverlayEntry? _overlayEntry;
 
   void _showOverlay(BuildContext context) {
@@ -24,28 +24,7 @@ class _HomeScreenState extends State<HomeScreen>{
                 Icons.close,
               ),
             ),
-            QCard(
-              frontWidget: Container(
-                width: 500,
-                height: 300,
-                child: Text('Front of Card'),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.all(16),
-              ),
-              backWidget: Container(
-                width: 500,
-                height: 300,
-                child: Text('Back of Card'),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.all(16),
-              ),
-            ),
+            const QCard(),
           ],
         );
       },

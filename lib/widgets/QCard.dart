@@ -1,65 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:flip_card/flip_card.dart';
 
-class QCard extends StatefulWidget {
-  final Widget frontWidget;
-  final Widget backWidget;
-
-  QCard({required this.frontWidget, required this.backWidget});
-
-  @override
-  _QCardState createState() => _QCardState();
-}
-
-class _QCardState extends State<QCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _frontAnimation;
-  late Animation<double> _backAnimation;
-  bool _isFrontVisible = true;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-
-    _frontAnimation = Tween<double>(begin: 0, end: -180).animate(_animationController)
-      ..addListener(() {
-        setState(() {});
-      });
-
-    _backAnimation = Tween<double>(begin: 180, end: 0).animate(_animationController)
-      ..addListener(() {
-        setState(() {});
-      });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
+class QCard extends StatelessWidget {
+  const QCard({super.key});
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (_isFrontVisible) {
-          _animationController.forward();
-        } else {
-          _animationController.reverse();
-        }
-        _isFrontVisible = !_isFrontVisible;
-      },
-      child: Transform(
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001)
-          ..rotateX(_isFrontVisible ? _frontAnimation.value : _backAnimation.value),
-        alignment: Alignment.center,
-        child: _isFrontVisible ? widget.frontWidget : widget.backWidget,
+    return _renderContent(context); //Stack(
+    //   fit: StackFit.expand,
+    //   children: <Widget>[
+    //     Column(
+    //       crossAxisAlignment: CrossAxisAlignment.stretch,
+    //       children: <Widget>[
+    //         Expanded(
+    //           flex: 1,
+    //           child: _renderContent(context),
+    //         ),
+    //         Expanded(
+    //           flex: 1,
+    //           child: Container(),
+    //         ),
+    //       ],
+    //     ),
+    //   ],
+    // );
+  }
+
+  _renderContent(context) {
+    return Expanded(
+      flex: 1,
+      child: Card(
+        elevation: 0.0,
+        margin:
+            EdgeInsets.only(left: 32.0, right: 32.0, top: 20.0, bottom: 0.0),
+        color: Color(0x00000000),
+        child: FlipCard(
+          direction: FlipDirection.HORIZONTAL,
+          side: CardSide.FRONT,
+          speed: 1000,
+          onFlipDone: (status) {
+            print(status);
+          },
+          front: Container(
+            decoration: BoxDecoration(
+              color: Color(0xFF006666),
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Front', style: Theme.of(context).textTheme.headline1),
+                Text('Click here to flip back',
+                    style: Theme.of(context).textTheme.bodyText1),
+              ],
+            ),
+          ),
+          back: Container(
+            decoration: BoxDecoration(
+              color: Color(0xFF006666),
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Back', style: Theme.of(context).textTheme.headline1),
+                Text('Click here to flip front',
+                    style: Theme.of(context).textTheme.bodyText1),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
-

@@ -15,26 +15,41 @@ class Player{
 
 class Game{
   int playerNum=0;
-  int currentPlayerIndex=0;
-  int round=0;
+  int currentPlayerIndex=0; // current player index that is activated
+  int round=28;
   int totalStep=28;
   List<Player> players=[];
 
-  Game({this.round=0, this.playerNum=0, this.totalStep=28});
+  Game({this.round=10, this.playerNum=0});
+
+  bool isGameOver(){
+    return playerNum>0 && players.indexWhere((p) => !p.isOver, currentPlayerIndex) == -1;
+  }
+
+  void setGameRound(int num){
+    totalStep = round * num;
+  }
 
   void generatePlayers(int num){
     playerNum=num;
+    currentPlayerIndex=0;
     players = List<Player>.generate(playerNum, (i) => Player(index: i+1, name: (i+1).toString()));
   }
-  void addPlayerScore(int diceValue) {
-    if(players[currentPlayerIndex].isOver){
+
+  void setCurrentPlayerIndex(){
+    if(currentPlayerIndex < playerNum-1){
       currentPlayerIndex++;
-      addPlayerScore(diceValue);
+    }else{
+      currentPlayerIndex=0;
     }
-    else{
-      players[currentPlayerIndex].step = diceValue;
+  }
+  void addPlayerScore(int diceValue) {
+    int index = players.indexWhere((p) => !p.isOver, currentPlayerIndex);
+    if(index > -1){
+      currentPlayerIndex = index;
+      players[currentPlayerIndex].step += diceValue;
       // check player
-      if(players[currentPlayerIndex].step >= totalStep){
+      if (players[currentPlayerIndex].step >= totalStep) {
         players[currentPlayerIndex].isOver = true;
       }
     }
@@ -55,25 +70,26 @@ class _RankingScreenState extends State<RankingScreen> {
   int playerNum=0;
   int playerIndex=0;
 
-  void _generatePlayer(int num) {
+  void _getGameRound(value){
+    int num = int.tryParse(value) ?? 0;
     setState(() {
-      playerNum=num;
-      // game.playerNum = num;
-      playerIndex=0;
-      items = List<Player>.generate(num, (i) => Player(index: i+1, name: (i+1).toString()));
+      game.setGameRound(num);
     });
   }
 
-  void _addPlayerScore() {
-    diceKey.currentState?._rollDice();
+  void _getPlayerNumber(value){
+    int num = int.tryParse(value) ?? 0;
     setState(() {
-      items[playerIndex].step += diceKey.currentState!._diceValue;
-
-      if (playerIndex < playerNum-1){
-        playerIndex++;
-      }else{
-        playerIndex=0;
-      }
+      game.generatePlayers(num);
+    });
+  }
+  // when roll dice animation ends, add player score
+  void _rollDiceButton(){
+    diceKey.currentState?._rollDice().then((value){
+      setState(() {
+        game.addPlayerScore(value);
+        game.setCurrentPlayerIndex();
+      });
     });
   }
 
@@ -84,46 +100,47 @@ class _RankingScreenState extends State<RankingScreen> {
         title: Text('Ranking'),
       ),
       body: Center(
-        child: Row(
+        child: Wrap(
           children: [
             Column(
               children: [
+                Text('Total Steps: ${game.totalStep}'),
+                // show 'Game Over!' when all player reach the steps
+                game.isGameOver()?
+                  Text(
+                    'Game Over!',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  )
+                : Text(''),
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  padding: EdgeInsets.all(20.0),
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  padding: EdgeInsets.all(5.0),
                   child: TextFormField(
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Enter Game Round',
                     ),
-                    onFieldSubmitted: (value) {
-                      int num = int.tryParse(value) ?? 0;
-                      // _generatePlayer(num);
-                      game.round = num;
-                      game.totalStep *= num;
-                    },
+                    onFieldSubmitted: _getGameRound,
                   ),
                 ),
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  padding: EdgeInsets.all(20.0),
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  padding: EdgeInsets.all(5.0),
                   child: TextFormField(
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Enter Player number',
                     ),
-                    onFieldSubmitted: (value) {
-                      int num = int.tryParse(value) ?? 0;
-                      _generatePlayer(num);
-                      // setState(() {
-                      //   game.generatePlayers(num);
-                      // });
-                    },
+                    onFieldSubmitted: _getPlayerNumber,
                   ),
                 ),
-                RollingDice(key: diceKey,)
+                RollingDice(key: diceKey,),
               ],
             ),
             Column(
@@ -134,17 +151,19 @@ class _RankingScreenState extends State<RankingScreen> {
                   height: MediaQuery.of(context).size.height * 0.5,
                   child: Expanded(
                     child: ListView.builder(
-                      itemCount: items.length,
+                      itemCount: game.players.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text('${items[index].name}: ${items[index].step} steps'),
+                          title: Text('${game.players[index].name}: ${game.players[index].step} steps'),
+                          // show activate player
+                          textColor: game.players[index].isOver ? Colors.black12: Colors.black,
                         );
                       },
                     ),
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: _addPlayerScore,
+                  onPressed: _rollDiceButton,
                   child: const Text('Roll Dice'),
                 ),
                 ElevatedButton(
@@ -167,7 +186,6 @@ class RollingDice extends StatefulWidget {
   @override
   _RollingDiceState createState() => _RollingDiceState();
 }
-
 class _RollingDiceState extends State<RollingDice>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
@@ -183,45 +201,35 @@ class _RollingDiceState extends State<RollingDice>
     curve: Curves.linear,
   ));
 
-  late final Animation<double> _scale = Tween<double>(
-    begin: 1,
-    end: 1,
-  ).animate(CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeOutBack,
-  ));
-
   int _diceValue = 1;
   double _imageSize = 50;
 
-  void _rollDice() {
+  Future<int> _rollDice() async {
+    await _controller.animateTo(0.5, curve: Curves.easeInOutBack);
+    int newDiceValue = Random().nextInt(6) + 1;
     setState(() {
-      _diceValue = Random().nextInt(6) + 1;
-      _imageSize = 100; // Reset the image size before starting the animation
+      _diceValue = newDiceValue;
     });
-    _controller.reset();
-    _controller.forward();
+    await _controller.animateTo(1.0, curve: Curves.easeOut);
+    return newDiceValue;
   }
 
   @override
   Widget build(BuildContext context) {
     return RotationTransition(
       turns: _rotation,
-      child: ScaleTransition(
-        scale: _scale,
-        child: AnimatedBuilder(
-          animation: _scale,
-          builder: (context, child) {
-            if (_scale.isCompleted) {
-              _imageSize = 50; // Set the image size based on the scale animation value
-            }
-            return Image.asset(
-              'assets/images/dice$_diceValue.png',
-              height: _imageSize,
-              width: _imageSize,
-            );
-          },
-        ),
+      child: AnimatedBuilder(
+        animation: _rotation,
+        builder: (context, child) {
+          if (_rotation.isCompleted) {
+            _imageSize = 50; // Set the image size based on the rotation animation value
+          }
+          return Image.asset(
+            'assets/images/dice$_diceValue.png',
+            height: _imageSize,
+            width: _imageSize,
+          );
+        },
       ),
     );
   }

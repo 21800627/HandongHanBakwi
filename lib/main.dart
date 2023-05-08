@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:handong_han_bakwi/src/BoardUI.dart';
 import 'package:handong_han_bakwi/src/DiceUI.dart';
 import 'package:handong_han_bakwi/src/HomeUI.dart';
+import 'package:handong_han_bakwi/src/MultiGameUI.dart';
 import 'package:handong_han_bakwi/src/RankingUI.dart';
 
 void main() {
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         '/diceExample': (context) => const DiceScreen(),
         '/boardExample': (context) => const BoardScreen(),
         '/rankingExample': (context) => const RankingScreen(),
+        '/multiGameExample': (context) => const MultiGameScreen(),
       },
     );
   }

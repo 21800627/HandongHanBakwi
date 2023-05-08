@@ -1,5 +1,20 @@
+import "dart:math";
 import 'package:flutter/material.dart';
 import 'package:handong_han_bakwi/widgets/QCard.dart';
+
+final _random = new Random();
+
+List<String> questionList = [
+  'What most surprised you when you first arrived on campus or first started classes at this school?',
+  'If I visited your hometown, what local spots would you suggest I see?',
+  'What movie do you think everyone should watch?',
+  'What are three things on your bucket list?',
+  'Who is your inspiration?',
+  'If you could change one thing about your past, what would it be?',
+  'What is your favorites way to spend a weekend?',
+  'What is your favorite thing to do on a rainy day?',
+  'Who would you choose if you could have a dinner date with anyone in the world?',
+];
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,12 +34,15 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+              ),
               onPressed: _hideOverlay,
               child: const Icon(
                 Icons.close,
               ),
             ),
-            const QCard(),
+            QCard(message: questionList[_random.nextInt(questionList.length)],),
           ],
         );
       },
@@ -88,6 +106,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pushNamed(context, '/rankingExample');
                 },
                 child: const Text('Player Ranking'),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.all(5.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/multiGameExample');
+                },
+                child: const Text('Multi Game Player'),
               ),
             ),
           ],

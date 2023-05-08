@@ -1,60 +1,22 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-class Player{
-  int index=0;
-  int score=0;
-  int step=0;
+import '../models/GAME.dart';
+import '../widgets/QCard.dart';
+final _random = new Random();
 
-  bool isOver=false;
-
-  String name;
-
-  Player({required this.index, this.name='', this.step=0, this.score=0});
-}
-
-class Game{
-  int playerNum=0;
-  int currentPlayerIndex=0; // current player index that is activated
-  int round=28;
-  int totalStep=28;
-  List<Player> players=[];
-
-  Game({this.round=10, this.playerNum=0});
-
-  bool isGameOver(){
-    return playerNum>0 && players.indexWhere((p) => !p.isOver, currentPlayerIndex) == -1;
-  }
-
-  void setGameRound(int num){
-    totalStep = round * num;
-  }
-
-  void generatePlayers(int num){
-    playerNum=num;
-    currentPlayerIndex=0;
-    players = List<Player>.generate(playerNum, (i) => Player(index: i+1, name: (i+1).toString()));
-  }
-
-  void setCurrentPlayerIndex(){
-    if(currentPlayerIndex < playerNum-1){
-      currentPlayerIndex++;
-    }else{
-      currentPlayerIndex=0;
-    }
-  }
-  void addPlayerScore(int diceValue) {
-    int index = players.indexWhere((p) => !p.isOver, currentPlayerIndex);
-    if(index > -1){
-      currentPlayerIndex = index;
-      players[currentPlayerIndex].step += diceValue;
-      // check player
-      if (players[currentPlayerIndex].step >= totalStep) {
-        players[currentPlayerIndex].isOver = true;
-      }
-    }
-  }
-}
+List<String> questionList = [
+  'What most surprised you when you first arrived on campus or first started classes at this school?',
+  'If I visited your hometown, what local spots would you suggest I see?',
+  'What movie do you think everyone should watch?',
+  'What are three things on your bucket list?',
+  'Who is your inspiration?',
+  'If you could change one thing about your past, what would it be?',
+  'What is your favorites way to spend a weekend?',
+  'What is your favorite thing to do on a rainy day?',
+  'Who would you choose if you could have a dinner date with anyone in the world?',
+];
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -66,9 +28,12 @@ class RankingScreen extends StatefulWidget {
 class _RankingScreenState extends State<RankingScreen> {
   final Game game = Game();
   final GlobalKey<_RollingDiceState> diceKey = GlobalKey<_RollingDiceState>();
+  OverlayEntry? _overlayEntry;
+
   List<Player> items = [];
   int playerNum=0;
   int playerIndex=0;
+  bool _isDiceButtonDisabled = false;
 
   void _getGameRound(value){
     int num = int.tryParse(value) ?? 0;
@@ -84,13 +49,56 @@ class _RankingScreenState extends State<RankingScreen> {
     });
   }
   // when roll dice animation ends, add player score
-  void _rollDiceButton(){
-    diceKey.currentState?._rollDice().then((value){
+  void _rollDiceButton() async {
+    setState(() {
+      _isDiceButtonDisabled = true;
+    });
+    await diceKey.currentState?._rollDice().then((value){
       setState(() {
         game.addPlayerScore(value);
         game.setCurrentPlayerIndex();
       });
     });
+
+    setState(() {
+      _isDiceButtonDisabled = false;
+    });
+  }
+
+  void _showOverlay(BuildContext context) {
+    assert(_overlayEntry == null);
+    _overlayEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+              ),
+              onPressed: _hideOverlay,
+              child: const Icon(
+                Icons.close,
+              ),
+            ),
+            QCard(message: questionList[_random.nextInt(questionList.length)],),
+          ],
+        );
+      },
+    );
+    // Add the OverlayEntry to the Overlay.
+    Overlay.of(context, debugRequiredFor: widget)?.insert(_overlayEntry!);
+  }
+
+  void _hideOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void dispose() {
+    // Make sure to remove OverlayEntry when the widget is disposed.
+    _hideOverlay();
+    super.dispose();
   }
 
   @override
@@ -104,16 +112,12 @@ class _RankingScreenState extends State<RankingScreen> {
           children: [
             Column(
               children: [
-                Text('Total Steps: ${game.totalStep}'),
+                Text('Total Steps: ${game.totalStep}',style: Theme.of(context).textTheme.bodyText2),
                 // show 'Game Over!' when all player reach the steps
                 game.isGameOver()?
                   Text(
                     'Game Over!',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                      style: Theme.of(context).textTheme.headline3
                   )
                 : Text(''),
                 Container(
@@ -140,7 +144,10 @@ class _RankingScreenState extends State<RankingScreen> {
                     onFieldSubmitted: _getPlayerNumber,
                   ),
                 ),
-                RollingDice(key: diceKey,),
+                Container(
+                  padding: EdgeInsets.all(20.0),
+                  child: RollingDice(key: diceKey,)
+                ),
               ],
             ),
             Column(
@@ -154,20 +161,23 @@ class _RankingScreenState extends State<RankingScreen> {
                       itemCount: game.players.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text('${game.players[index].name}: ${game.players[index].step} steps'),
+                          title: Text('${game.players[index].index}: ${game.players[index].step} steps'),
                           // show activate player
                           textColor: game.players[index].isOver ? Colors.black12: Colors.black,
+                          selected: game.isCurrentPlayerIndex(index) ? true : false,
                         );
                       },
                     ),
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: _rollDiceButton,
+                  onPressed: _isDiceButtonDisabled ? null : _rollDiceButton,
+                  // onPressed: _rollDiceButton,
                   child: const Text('Roll Dice'),
                 ),
                 ElevatedButton(
                   onPressed: () {
+                    _showOverlay(context);
                   },
                   child: const Text('Show Q-Card'),
                 ),

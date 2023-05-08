@@ -17,7 +17,7 @@ class _BoardScreenState extends State<BoardScreen>{
         title: Text('Board'),
       ),
       body: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
+        width: MediaQuery.of(context).size.width * 0.75,
         // height: MediaQuery.of(context).size.height,
         margin: const EdgeInsets.all(10.0),
         child: StaggeredGrid.count(
@@ -62,7 +62,7 @@ class Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const _defaultColor = Color(0xFF34568B);
+    const _defaultColor = Colors.grey;
 
     final child = Container(
       color: backgroundColor ?? _defaultColor,

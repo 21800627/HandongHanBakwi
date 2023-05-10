@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 margin: const EdgeInsets.all(5.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigator.pushNamed(context, '/rankingExample');
+                    Navigator.pushNamed(context, '/HostGamePage');
                   },
                   child: const Text('Host Game'),
                 ),
@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 margin: const EdgeInsets.all(5.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigator.pushNamed(context, '/multiGameExample');
+                    //Navigator.pushNamed(context, '/JoinPage');
                   },
                   child: const Text('Join Game'),
                 ),

@@ -27,7 +27,8 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
   bool _isDiceButtonDisabled = false;
 
   // when roll dice animation ends, add player score
-  void _rollDiceButton() async {
+  void _rollDiceButton(BuildContext context) async {
+    // await _showDiceOverlay(context);
     setState(() {
       _isDiceButtonDisabled = true;
     });
@@ -37,10 +38,34 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
         game.setCurrentPlayerIndex();
       });
     });
-
     setState(() {
       _isDiceButtonDisabled = false;
     });
+  }
+  // roll button 클릭 시 주사위가 overlay 되고 이후에 에니메이션을 주고 싶은데 안됨
+  Future<int> _showDiceOverlay(BuildContext context) async{
+    assert(_overlayEntry == null);
+    _overlayEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+              ),
+              onPressed: _hideOverlay,
+              child: const Icon(
+                Icons.close,
+              ),
+            ),
+            Dice(key: diceKey),
+          ],
+        );
+      },
+    );
+    Overlay.of(context, debugRequiredFor: widget)?.insert(_overlayEntry!);
+    return 0;
   }
 
   void _showOverlay(BuildContext context) {
@@ -90,7 +115,7 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Container(
-            width: MediaQuery.of(context).size.width * 0.75,
+            width: MediaQuery.of(context).size.width * 0.65,
             child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 10,
@@ -143,6 +168,7 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
                 }
             ),
           ),
+          Dice(key: diceKey),
           Container(
             width: MediaQuery.of(context).size.width * 0.25,
             child:             Column(
@@ -166,7 +192,9 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: _isDiceButtonDisabled ? null : _rollDiceButton,
+                  onPressed: (){
+                    _isDiceButtonDisabled ? null : _rollDiceButton(context);
+                  },
                   child: const Text('Roll Dice'),
                 ),
                 ElevatedButton(

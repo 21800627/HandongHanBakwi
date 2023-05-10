@@ -60,8 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Text('Game Design',style: Theme.of(context).textTheme.headline6),
+              Text('Test Page',style: Theme.of(context).textTheme.bodyLarge),
               Container(
-                margin: const EdgeInsets.all(5.0),
+                margin: const EdgeInsets.only(top: 10.0),
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/boardExample');
@@ -101,8 +103,10 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Text('Data Flow',style: Theme.of(context).textTheme.headline6),
+              Text('Test Page',style: Theme.of(context).textTheme.bodyLarge),
               Container(
-                margin: const EdgeInsets.all(5.0),
+                margin: const EdgeInsets.only(top: 10.0),
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/rankingExample');
@@ -117,6 +121,29 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.pushNamed(context, '/multiGameExample');
                   },
                   child: const Text('Multi Game Player'),
+                ),
+              ),
+            ],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                margin: const EdgeInsets.all(5.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Navigator.pushNamed(context, '/rankingExample');
+                  },
+                  child: const Text('Host Game'),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.all(5.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Navigator.pushNamed(context, '/multiGameExample');
+                  },
+                  child: const Text('Join Game'),
                 ),
               ),
             ],

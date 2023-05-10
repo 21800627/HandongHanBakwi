@@ -16,31 +16,35 @@ class _BoardScreenState extends State<BoardScreen>{
       appBar: AppBar(
         title: Text('Board'),
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width * 0.75,
-        // height: MediaQuery.of(context).size.height,
-        margin: const EdgeInsets.all(10.0),
-        child: StaggeredGrid.count(
-          crossAxisCount: 10,
-          mainAxisSpacing: 6,
-          crossAxisSpacing: 6,
-          children: [
-            for(int i = 0; i<28; i++)...[
-              // board center
-              if (i==11)
-                const StaggeredGridTile.count(
-                  crossAxisCellCount: 8,
-                  mainAxisCellCount: 4,
-                  child: Tile(index: 11),
-                ),
-              StaggeredGridTile.count(
-                crossAxisCellCount: 1,
-                mainAxisCellCount: 1,
-                child: Tile(index: i),
-              ),
-            ]
-          ],
-        ),
+      body: Wrap(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.5,
+            // height: MediaQuery.of(context).size.height,
+            margin: const EdgeInsets.all(10.0),
+            child: StaggeredGrid.count(
+              crossAxisCount: 10,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 6,
+              children: [
+                for(int i = 0; i<28; i++)...[
+                  // board center
+                  if (i==11)
+                    const StaggeredGridTile.count(
+                      crossAxisCellCount: 8,
+                      mainAxisCellCount: 4,
+                      child: Tile(index: 11,backgroundColor: Colors.orangeAccent,),
+                    ),
+                  StaggeredGridTile.count(
+                    crossAxisCellCount: 1,
+                    mainAxisCellCount: 1,
+                    child: Tile(index: i,bottomSpace: 10,),
+                  ),
+                ]
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

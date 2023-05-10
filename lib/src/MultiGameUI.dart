@@ -21,8 +21,8 @@ class _MultiGameScreenState extends State<MultiGameScreen>{
   void _hostGame(){
     setState(() {
       game.setGameRound(_gameRound);
-      game.generatePlayers(_playerNumber);
-      game.generateGameCode();
+      game.setPlayers(_playerNumber);
+      game.setGameCode();
     });
   }
 

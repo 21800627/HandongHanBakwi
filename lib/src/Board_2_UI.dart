@@ -22,25 +22,26 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
   final Game game = Game(roundStep: 39, playerNum: 3);
   OverlayEntry? _overlayEntry;
 
-  int playerNum=0;
+  int playerNum=3;
   int playerIndex=0;
   bool _isDiceButtonDisabled = false;
 
   // when roll dice animation ends, add player score
-  void _rollDiceButton(BuildContext context) async {
-    // await _showDiceOverlay(context);
+  void _rollDiceButton() async {
     setState(() {
       _isDiceButtonDisabled = true;
     });
-    await diceKey.currentState?.rollDice().then((value){
-      setState(() {
-        game.addPlayerScore(value);
-        game.setCurrentPlayerIndex();
+    if(!game.isGameOver()){
+      await diceKey.currentState?.rollDice().then((value){
+        setState(() {
+          game.addPlayerSteps(value);
+          game.setCurrentPlayerIndex();
+        });
       });
-    });
-    setState(() {
-      _isDiceButtonDisabled = false;
-    });
+      setState(() {
+        _isDiceButtonDisabled = false;
+      });
+    }
   }
   // roll button 클릭 시 주사위가 overlay 되고 이후에 에니메이션을 주고 싶은데 안됨
   Future<int> _showDiceOverlay(BuildContext context) async{
@@ -157,13 +158,13 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
                     return Container(
                       padding: const EdgeInsets.all(8),
                       color: Colors.teal[100],
-                      child: Center(child: Text('${viewIndex}')),
+                      child: tile(viewIndex),
                     );
                   }
                   return Container(
                     padding: const EdgeInsets.all(8),
                     color: Colors.teal[100],
-                    child: Center(child: Text('$index')),
+                    child: tile(index),
                   );
                 }
             ),
@@ -171,7 +172,7 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
           Dice(key: diceKey),
           Container(
             width: MediaQuery.of(context).size.width * 0.25,
-            child:             Column(
+            child:Column(
               children: [
                 Container(
                   padding: EdgeInsets.all(10.0),
@@ -182,7 +183,7 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
                       itemCount: game.players.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text('${game.players[index].index}: ${game.players[index].step} steps'),
+                          title: Text('${game.players[index].index}: ${game.players[index].totalStep} steps/${game.players[index].roundNum} round'),
                           // show activate player
                           textColor: game.players[index].isOver ? Colors.black12: Colors.black,
                           selected: game.isCurrentPlayerIndex(index) ? true : false,
@@ -192,9 +193,7 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: (){
-                    _isDiceButtonDisabled ? null : _rollDiceButton(context);
-                  },
+                  onPressed: _isDiceButtonDisabled ? null : _rollDiceButton,
                   child: const Text('Roll Dice'),
                 ),
                 ElevatedButton(
@@ -210,10 +209,40 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
       ),
     );
   }
+
+  tile(tileIndex) => LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        double parentWidth = constraints.maxWidth;
+        double parentHeight = constraints.maxHeight;
+
+        // Calculate the size of the child widget based on the size of the parent widget
+        double childWidth = parentWidth * 0.5;
+        double childHeight = parentHeight * 0.5;
+
+        return Stack(
+          children: List.generate(playerNum, (index) {
+              if(game.board.tileIndex[tileIndex].isNotEmpty) {
+                return Positioned(
+                  left: 0, // Position each widget horizontally
+                  top: 0, // Position each widget vertically
+                  child: Container(
+                    width: childWidth,
+                    height: childHeight,
+                    color: Colors.yellow,
+                    child: Text('${tileIndex}'),
+                  )
+                );
+              }
+              return Container();
+              },
+          ),
+        );
+      }
+  );
 }
 
 class Tile extends StatelessWidget {
-  const Tile({
+   Tile({
     Key? key,
     required this.index,
     this.extent,
@@ -225,23 +254,38 @@ class Tile extends StatelessWidget {
   final double? extent;
   final double? bottomSpace;
   final Color? backgroundColor;
+  final List<Player> players = [];
 
   @override
   Widget build(BuildContext context) {
     const _defaultColor = Colors.grey;
 
-    final child = Container(
-      color: backgroundColor ?? _defaultColor,
-      height: extent,
-      child: Center(
-        child: CircleAvatar(
-          minRadius: 20,
-          maxRadius: 20,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          child: Text('$index', style: const TextStyle(fontSize: 20)),
-        ),
-      ),
+    final child = LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          double parentWidth = constraints.maxWidth;
+          double parentHeight = constraints.maxHeight;
+
+          // Calculate the size of the child widget based on the size of the parent widget
+          double childWidth = parentWidth * 0.5;
+          double childHeight = parentHeight * 0.5;
+
+          return Stack(
+            children: List.generate(
+              players.length,
+                  (index) {
+                return Positioned(
+                  left: 0, // Position each widget horizontally
+                  top: 0, // Position each widget vertically
+                  child: Container(
+                    width: childWidth,
+                    height: childHeight,
+                    color: Colors.yellow,
+                  )
+                );
+              },
+            ),
+          );
+        }
     );
 
     if (bottomSpace == null) {

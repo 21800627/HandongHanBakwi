@@ -32,7 +32,7 @@ class _RankingScreenState extends State<RankingScreen> {
   void _getPlayerNumber(value){
     int num = int.tryParse(value) ?? 0;
     setState(() {
-      game.generatePlayers(num);
+      game.setPlayers(num);
     });
   }
   // when roll dice animation ends, add player score
@@ -42,7 +42,7 @@ class _RankingScreenState extends State<RankingScreen> {
     });
     await diceKey.currentState?.rollDice().then((value){
       setState(() {
-        game.addPlayerScore(value);
+        game.addPlayerSteps(value);
         game.setCurrentPlayerIndex();
       });
     });
@@ -148,7 +148,7 @@ class _RankingScreenState extends State<RankingScreen> {
                       itemCount: game.players.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text('${game.players[index].index}: ${game.players[index].step} steps'),
+                          title: Text('${game.players[index].index}: ${game.players[index].totalStep} steps/${game.players[index].roundNum} round'),
                           // show activate player
                           textColor: game.players[index].isOver ? Colors.black12: Colors.black,
                           selected: game.isCurrentPlayerIndex(index) ? true : false,

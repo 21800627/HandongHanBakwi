@@ -10,6 +10,12 @@ class DiceScreen extends StatefulWidget {
 
 class _DiceScreenState extends State<DiceScreen>{
 
+  final GlobalKey<DiceState> diceKey = GlobalKey<DiceState>();
+
+  void _rollDiceButton() async {
+    await diceKey.currentState?.rollDice().then((value) {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,15 +24,19 @@ class _DiceScreenState extends State<DiceScreen>{
       ),
       body: Container(
           margin: const EdgeInsets.all(10.0),
-          decoration: BoxDecoration(
-            border: Border.all(
-              width: 1,
-              color: Colors.orange,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                  padding: EdgeInsets.all(20.0),
+                  child: Dice(key: diceKey,)
+              ),
+              ElevatedButton(
+                onPressed: _rollDiceButton,
+                child: const Text('Roll Dice'),
+              )
+            ],
           ),
-          width: 250,
-          height: 250,
-          child: Dice(left: 0.0, top: 0.0)
       ),
     );
   }

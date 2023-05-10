@@ -1,22 +1,9 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:handong_han_bakwi/models/QUESTION.dart';
 
 import '../models/GAME.dart';
+import '../widgets/Dice.dart';
 import '../widgets/QCard.dart';
-final _random = new Random();
-
-List<String> questionList = [
-  'What most surprised you when you first arrived on campus or first started classes at this school?',
-  'If I visited your hometown, what local spots would you suggest I see?',
-  'What movie do you think everyone should watch?',
-  'What are three things on your bucket list?',
-  'Who is your inspiration?',
-  'If you could change one thing about your past, what would it be?',
-  'What is your favorites way to spend a weekend?',
-  'What is your favorite thing to do on a rainy day?',
-  'Who would you choose if you could have a dinner date with anyone in the world?',
-];
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -26,11 +13,11 @@ class RankingScreen extends StatefulWidget {
 }
 
 class _RankingScreenState extends State<RankingScreen> {
+  final GlobalKey<DiceState> diceKey = GlobalKey<DiceState>();
+
   final Game game = Game();
-  final GlobalKey<_RollingDiceState> diceKey = GlobalKey<_RollingDiceState>();
   OverlayEntry? _overlayEntry;
 
-  List<Player> items = [];
   int playerNum=0;
   int playerIndex=0;
   bool _isDiceButtonDisabled = false;
@@ -53,7 +40,7 @@ class _RankingScreenState extends State<RankingScreen> {
     setState(() {
       _isDiceButtonDisabled = true;
     });
-    await diceKey.currentState?._rollDice().then((value){
+    await diceKey.currentState?.rollDice().then((value){
       setState(() {
         game.addPlayerScore(value);
         game.setCurrentPlayerIndex();
@@ -81,7 +68,7 @@ class _RankingScreenState extends State<RankingScreen> {
                 Icons.close,
               ),
             ),
-            QCard(message: questionList[_random.nextInt(questionList.length)],),
+            QCard(message: Question().getQuestion(),),
           ],
         );
       },
@@ -146,7 +133,7 @@ class _RankingScreenState extends State<RankingScreen> {
                 ),
                 Container(
                   padding: EdgeInsets.all(20.0),
-                  child: RollingDice(key: diceKey,)
+                  child: Dice(key: diceKey,)
                 ),
               ],
             ),
@@ -172,7 +159,6 @@ class _RankingScreenState extends State<RankingScreen> {
                 ),
                 ElevatedButton(
                   onPressed: _isDiceButtonDisabled ? null : _rollDiceButton,
-                  // onPressed: _rollDiceButton,
                   child: const Text('Roll Dice'),
                 ),
                 ElevatedButton(
@@ -189,66 +175,3 @@ class _RankingScreenState extends State<RankingScreen> {
     );
   }
 }
-
-class RollingDice extends StatefulWidget {
-  const RollingDice({Key? key}) : super(key: key);
-
-  @override
-  _RollingDiceState createState() => _RollingDiceState();
-}
-class _RollingDiceState extends State<RollingDice>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 2000),
-  );
-
-  late final Animation<double> _rotation = Tween<double>(
-    begin: 0,
-    end: 2 * pi,
-  ).animate(CurvedAnimation(
-    parent: _controller,
-    curve: Curves.linear,
-  ));
-
-  int _diceValue = 1;
-  double _imageSize = 50;
-
-  Future<int> _rollDice() async {
-    await _controller.animateTo(0.5, curve: Curves.easeInOutBack);
-    int newDiceValue = Random().nextInt(6) + 1;
-    setState(() {
-      _diceValue = newDiceValue;
-    });
-    await _controller.animateTo(1.0, curve: Curves.easeOut);
-    return newDiceValue;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RotationTransition(
-      turns: _rotation,
-      child: AnimatedBuilder(
-        animation: _rotation,
-        builder: (context, child) {
-          if (_rotation.isCompleted) {
-            _imageSize = 50; // Set the image size based on the rotation animation value
-          }
-          return Image.asset(
-            'assets/images/dice$_diceValue.png',
-            height: _imageSize,
-            width: _imageSize,
-          );
-        },
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-}
-
-

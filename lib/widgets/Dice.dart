@@ -3,75 +3,63 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class Dice extends StatefulWidget {
-  final double left;
-  final double top;
-
-  Dice({required this.left, required this.top});
+  const Dice({Key? key}) : super(key: key);
 
   @override
-  _DiceState createState() => _DiceState();
+  DiceState createState() => DiceState();
 }
 
-class _DiceState extends State<Dice>{
-  Offset position = Offset.zero;
-  final double boxSize = 50.0;
-  final double boundaryLeft = 0.0;
-  final double boundaryRight = 200.0;
-  final double boundaryTop = 0.0;
-  final double boundaryBottom = 200.0;
+class DiceState extends State<Dice>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2000),
+  );
 
-  int _value = 1;
+  late final Animation<double> _rotation = Tween<double>(
+    begin: 0,
+    end: 2 * pi,
+  ).animate(CurvedAnimation(
+    parent: _controller,
+    curve: Curves.linear,
+  ));
 
-  // Set the boundaries for the box
-  void _handleDrragableCanceled(velocity, offset){
+  int _diceValue = 1;
+  double _imageSize = 50;
+
+  Future<int> rollDice() async {
+    await _controller.animateTo(0.5, curve: Curves.easeInOutBack);
+    int newDiceValue = Random().nextInt(6) + 1;
     setState(() {
-      double newLeft = offset.dx;
-      double newTop = offset.dy;
-
-      if (newLeft < boundaryLeft) {
-        newLeft = boundaryLeft;
-      } else if (newLeft > boundaryRight) {
-        newLeft = boundaryRight - boxSize;
-      }
-
-      if (newTop < boundaryTop) {
-        newTop = boundaryTop;
-      } else if (newTop > boundaryBottom) {
-        newTop = boundaryBottom - boxSize;
-      }
-
-      _value = Random().nextInt(6) + 1;
-      position = Offset(newLeft, newTop);
+      _diceValue = newDiceValue;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    position = Offset(widget.left, widget.top);
+    await _controller.animateTo(1.0, curve: Curves.easeOut);
+    return newDiceValue;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          left: position.dx,
-          top: position.dy,
-          child: Draggable(
-            feedback: SizedBox(
-              height: 100,
-              child: Image.asset('assets/images/dicePick.png'),
-            ),
-            childWhenDragging: Container(),
-            onDraggableCanceled: _handleDrragableCanceled,
-            child: SizedBox(
-              height: 50,
-              child: Image.asset('assets/images/dice$_value.png'),
-            ),
-          ),
-        ),
-      ],
+    return RotationTransition(
+      turns: _rotation,
+      child: AnimatedBuilder(
+        animation: _rotation,
+        builder: (context, child) {
+          if (_rotation.isCompleted) {
+            _imageSize = 50; // Set the image size based on the rotation animation value
+          }
+          return Image.asset(
+            'assets/images/dice$_diceValue.png',
+            height: _imageSize,
+            width: _imageSize,
+          );
+        },
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

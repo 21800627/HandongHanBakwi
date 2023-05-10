@@ -17,19 +17,23 @@ class Player{
 class Game{
   int playerNum=0;
   int currentPlayerIndex=0; // current player index that is activated
-  int round=28;
+  int roundStep=28;
   int totalStep=28;
   List<Player> players=[];
   String _gameCode='';
 
-  Game({this.round=10, this.playerNum=0,});
+  Game({this.roundStep=10, this.playerNum=0}){
+    totalStep = roundStep;
+    currentPlayerIndex=0;
+    players = List<Player>.generate(playerNum, (i) => Player(index: i+1));
+  }
 
   bool isGameOver(){
     return playerNum>0 && players.indexWhere((p) => !p.isOver) == -1;
   }
 
   void setGameRound(int num){
-    totalStep = round * num;
+    totalStep = roundStep * num;
   }
 
   void generatePlayers(int num){

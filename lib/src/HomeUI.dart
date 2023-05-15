@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
     // Add the OverlayEntry to the Overlay.
-    Overlay.of(context, debugRequiredFor: widget).insert(_overlayEntry!);
+    Overlay.of(context, debugRequiredFor: widget)?.insert(_overlayEntry!);
   }
 
   void _hideOverlay() {
@@ -89,15 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Text('Show Q-Card'),
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.all(5.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/board_2_Example');
-                  },
-                  child: const Text('Board Grid'),
-                ),
-              ),
             ],
           ),
           Column(
@@ -121,6 +112,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.pushNamed(context, '/multiGameExample');
                   },
                   child: const Text('Multi Game Player'),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.all(5.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/board_2_Example');
+                  },
+                  child: const Text('Board Grid'),
                 ),
               ),
             ],

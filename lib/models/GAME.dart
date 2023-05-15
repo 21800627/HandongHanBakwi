@@ -16,10 +16,6 @@ class Player{
   Player({required this.index, this.name='', this.roundStep=0,this.roundNum=1,this.totalStep=0, this.score=0});
 }
 
-class Board{
-  late List<List<Player>> tileIndex;
-}
-
 class Game {
   int playerNum=0;
   int currentPlayerIndex=0; // current player index that is activated
@@ -27,22 +23,22 @@ class Game {
   int roundNum=0;
   int totalStep=28;
 
-  Board board = Board();
+  List<List<Player>> tileIndex = List.filled(0,[]);
   List<Player> players=[];
 
   String _gameCode='';
 
-  Game({this.roundStep=10, this.playerNum=0}){
-    totalStep = roundStep;
+  Game({this.roundStep=10, this.roundNum=1, this.playerNum=0}){
+    totalStep = roundStep*roundNum;
     currentPlayerIndex=0;
     players = List<Player>.generate(playerNum, (i) => Player(index: i+1));
-    board.tileIndex = List<List<Player>>.generate(totalStep, (i) => []);
+    tileIndex = List<List<Player>>.generate(roundStep, (i) => []);
   }
 
   void setGameRound(int num){
     roundNum=num;
     totalStep = roundStep * num;
-    board.tileIndex = List<List<Player>>.generate(totalStep, (i) => []);
+    tileIndex = List<List<Player>>.generate(roundStep, (i) => []);
   }
 
   void setPlayers(int num){
@@ -82,18 +78,18 @@ class Game {
     return _gameCode;
   }
 
-  List<Player> getPlayersByIndex(int index){
-    List<Player> playersAtIndex = [];
-    int currentStep = 0;
-    for(int i=0; i<roundNum; i++){
-      currentStep = roundNum * index;
-      playersAtIndex.addAll(players.where((p) => p.totalStep == currentStep));
+  bool getPlayersByIndex(int index, int playerIndex){
+    if(index<roundStep){
+      List<Player> playersAtIndex = tileIndex[index];
+      return playersAtIndex.any((p) => p.index == playerIndex+1);
     }
-    return playersAtIndex;
+    else{
+      return false;
+    }
   }
 
   bool isGameOver(){
-    return playerNum>0 && players.indexWhere((p) => !p.isOver) == -1;
+    return playerNum>0 && players.indexWhere((p) => p.isOver) > 0;
   }
 
   bool isCurrentPlayerIndex(int index){
@@ -107,12 +103,17 @@ class Game {
       currentPlayerIndex = index;
       players[currentPlayerIndex].totalStep += diceValue;
 
+      //set round Num
+      if(players[currentPlayerIndex].totalStep > roundStep * players[currentPlayerIndex].roundNum){
+        players[currentPlayerIndex].roundNum++;
+      }
+
       // check player
       if (players[currentPlayerIndex].totalStep >= totalStep) {
         players[currentPlayerIndex].isOver = true;
         players[currentPlayerIndex].roundNum = roundNum;
 
-        for (var list in board.tileIndex) {
+        for (var list in tileIndex) {
           if(list.isNotEmpty){
             list.removeWhere((p) => p == players[currentPlayerIndex]);
           }
@@ -120,18 +121,19 @@ class Game {
         return;
       }
 
-      int currentPlayerStep =  players[currentPlayerIndex].totalStep;
-      for (var list in board.tileIndex) {
+      int currentPlayerStep = 0;
+      if(players[currentPlayerIndex].totalStep < roundStep){
+        currentPlayerStep = players[currentPlayerIndex].totalStep;
+      }
+      else{
+        currentPlayerStep = players[currentPlayerIndex].totalStep % roundStep;
+      }
+      for (var list in tileIndex) {
         if(list.isNotEmpty){
           list.removeWhere((p) => p == players[currentPlayerIndex]);
         }
       }
-      board.tileIndex[currentPlayerStep].add(players[currentPlayerIndex]);
-
-      //set round Num
-      if(players[currentPlayerIndex].totalStep > roundStep * players[currentPlayerIndex].roundNum){
-        players[currentPlayerIndex].roundNum++;
-      }
+      tileIndex[currentPlayerStep].add(players[currentPlayerIndex]);
     }
   }
 
@@ -144,5 +146,12 @@ class Game {
       }
     }
     return -1;
+  }
+
+  String showMessageStep(int index){
+    return '${players[index].totalStep} steps';
+  }
+  String showMessageRound(int index){
+    return '${players[index].roundNum} round';
   }
 }

@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
     // Add the OverlayEntry to the Overlay.
-    Overlay.of(context, debugRequiredFor: widget)?.insert(_overlayEntry!);
+    Overlay.of(context, debugRequiredFor: widget).insert(_overlayEntry!);
   }
 
   void _hideOverlay() {
@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text('Game Design',style: Theme.of(context).textTheme.headline6),
+              Text('Game Design',style: Theme.of(context).textTheme.titleLarge),
               Text('Test Page',style: Theme.of(context).textTheme.bodyLarge),
               Container(
                 margin: const EdgeInsets.only(top: 10.0),
@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text('Data Flow',style: Theme.of(context).textTheme.headline6),
+              Text('Data Flow',style: Theme.of(context).textTheme.titleLarge),
               Text('Test Page',style: Theme.of(context).textTheme.bodyLarge),
               Container(
                 margin: const EdgeInsets.only(top: 10.0),
@@ -144,6 +144,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     //Navigator.pushNamed(context, '/JoinPage');
                   },
                   child: const Text('Join Game'),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.all(5.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/WaitingPage');
+                  },
+                  child: const Text('Waiting Game'),
                 ),
               ),
             ],

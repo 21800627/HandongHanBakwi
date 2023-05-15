@@ -7,6 +7,8 @@ import 'package:handong_han_bakwi/src/HomeUI.dart';
 import 'package:handong_han_bakwi/src/HostGameUI.dart';
 import 'package:handong_han_bakwi/src/MultiGameUI.dart';
 import 'package:handong_han_bakwi/src/RankingUI.dart';
+import 'package:handong_han_bakwi/src/WaitingGameUI.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +42,7 @@ class MyApp extends StatelessWidget {
         '/rankingExample': (context) => const RankingScreen(),
         '/multiGameExample': (context) => const MultiGameScreen(),
         '/HostGamePage' : (context) => const HostGamePage(),
+        '/WaitingPage' : (context) => const WaitingGameScreen(),
       },
     );
   }

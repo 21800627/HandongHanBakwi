@@ -71,23 +71,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Text('Show Board'),
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.all(5.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/diceExample');
-                  },
-                  child: const Text('Show Dice'),
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/diceExample');
+                },
+                child: const Text('Show Dice'),
               ),
-              Container(
-                margin: const EdgeInsets.all(5.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    _showOverlay(context);
-                  },
-                  child: const Text('Show Q-Card'),
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  _showOverlay(context);
+                },
+                child: const Text('Show Q-Card'),
               ),
             ],
           ),
@@ -105,23 +99,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Text('Player Ranking'),
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.all(5.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/multiGameExample');
-                  },
-                  child: const Text('Multi Game Player'),
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/multiGameExample');
+                },
+                child: const Text('Multi Game Player'),
               ),
-              Container(
-                margin: const EdgeInsets.all(5.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/board_2_Example');
-                  },
-                  child: const Text('Board Grid'),
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/board_2_Example');
+                },
+                child: const Text('Board Grid'),
               ),
             ],
           ),

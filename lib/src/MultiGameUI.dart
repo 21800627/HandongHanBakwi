@@ -1,176 +1,184 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../models/GAME.dart';
 
-class MultiGameScreen extends StatefulWidget {
+class MultiGameScreen extends StatelessWidget{
   const MultiGameScreen({super.key});
 
   @override
-  State<MultiGameScreen> createState() => _MultiGameScreenState();
-}
-
-class _MultiGameScreenState extends State<MultiGameScreen>{
-
-  final Game game = Game();
-
-  int _gameRound = 0;
-  int _playerNumber = 0;
-  String _gameCode = '';
-  String _playerName = '';
-
-  void _hostGame(){
-    setState(() {
-      game.setGameRound(_gameRound);
-      game.setPlayers(_playerNumber);
-      game.setGameCode();
-    });
-  }
-
-  void _joinGame(){
-    setState(() {
-      game.enterGame(_gameCode, _playerName);
-    });
-  }
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Multi Game'),
-      ),
-      body: Center(
-        child: Wrap(
-          children: [
-            Column(
+    return Consumer<Game>(
+      builder: (context, model, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Multi Game'),
+          ),
+          body: Center(
+            child: Wrap(
               children: [
-                Text('Show Host Code: ${game.getGameCode()}',style: Theme.of(context).textTheme.bodyText2),
-                Wrap(
+                Column(
                   children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
-                      padding: EdgeInsets.all(5.0),
-                      child: TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Enter Game Round',
+                    Column(
+                      children: [
+                        Wrap(
+                          children:[
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              padding: EdgeInsets.all(5.0),
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Enter Host Code',
+                                ),
+                                onChanged: (value) {
+                                  model.setHostCode(value);
+                                },
+                              ),
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              padding: EdgeInsets.all(5.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(text: model.hostCode));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Text copied to clipboard')),
+                                  );
+                                },
+                                child: SelectableText(
+                                  model.hostCode,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),                            ),
+                              ),
+                            ),
+                          ],
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            _gameRound = int.tryParse(value) ?? 0;
-                          });
-                        },
-                      ),
+                        Wrap(
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              padding: EdgeInsets.all(5.0),
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Enter Game Round',
+                                ),
+                                onChanged: (value) {
+                                  model.setRoundNum(int.parse(value));
+                                },
+                              ),
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              padding: EdgeInsets.all(5.0),
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Enter Player number',
+                                ),
+                                onChanged: (value) {
+                                  model.setPlayerNum(int.parse(value));
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
-                      padding: EdgeInsets.all(5.0),
-                      child: TextFormField(
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Enter Player number',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            _playerNumber = int.tryParse(value) ?? 0;
-                          });
+                      margin: const EdgeInsets.all(5.0),
+                      child: ElevatedButton(
+                        onPressed: (){
+                          model.hostGame();
                         },
+                        child: const Text('Host Game'),
+                      ),
+                    ),
+                    Wrap(
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          padding: EdgeInsets.all(5.0),
+                          child: TextFormField(
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                              border: OutlineInputBorder(),
+                              labelText: 'Enter host code',
+                            ),
+                            onChanged: (value) {
+                              model.hostGame();
+                            },
+                          ),
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          padding: EdgeInsets.all(5.0),
+                          child: TextFormField(
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                              border: OutlineInputBorder(),
+                              labelText: 'Enter player name',
+                            ),
+                            onChanged: (value) {
+                              model.setPlayerName(value);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      margin: const EdgeInsets.all(5.0),
+                      child: ElevatedButton(
+                        onPressed: (){},
+                        child: const Text('Join Game'),
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  margin: const EdgeInsets.all(5.0),
-                  child: ElevatedButton(
-                    onPressed: _hostGame,
-                    child: const Text('Host Game'),
-                  ),
-                ),
-                Wrap(
+                Column(
                   children: [
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
                       padding: EdgeInsets.all(5.0),
-                      child: TextFormField(
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Enter host code',
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      height: MediaQuery.of(context).size.height * 0.6,
+                      child: Expanded(
+                        child: ListView(
+                          children: [
+                            ...model.players.map((p)=>Card(
+                              child: ListTile(
+                                  title: Text('${p.index}:')
+                              ),
+                            ))
+                          ],
                         ),
-                        onChanged: (value){
-                          setState(() {
-                            _gameCode = value;
-                          });
-                        },
                       ),
                     ),
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
-                      padding: EdgeInsets.all(5.0),
-                      child: TextFormField(
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Enter player name',
-                        ),
-                        onChanged: (value){
-                          setState(() {
-                            _playerName = value;
-                          });
+                      margin: const EdgeInsets.all(5.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/board_2_Example');
                         },
+                        child: const Text('Enter Game'),
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  margin: const EdgeInsets.all(5.0),
-                  child: ElevatedButton(
-                    onPressed: _joinGame,
-                    child: const Text('Join Game'),
-                  ),
-                ),
               ],
             ),
-            const VerticalDivider(
-              thickness: 2,
-              color: Colors.grey,
-            ),
-            Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(5.0),
-                  width: MediaQuery.of(context).size.width * 0.3,
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  child: Expanded(
-                    child: ListView.builder(
-                      itemCount: game.players.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text('[${game.players[index].index}] ${game.players[index].name}'),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(5.0),
-                  child: ElevatedButton(
-                    onPressed: null,
-                    child: const Text('Exit Game [Host]'),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(bottom: 5.0),
-                  child: ElevatedButton(
-                    onPressed: null,
-                    child: const Text('Exit Game [Player]'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }
     );
   }
 }

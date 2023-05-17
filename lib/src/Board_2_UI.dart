@@ -1,39 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/GAME.dart';
 import '../models/QUESTION.dart';
 import '../widgets/Dice.dart';
 import '../widgets/QCard.dart';
 
-class Board_2_Screen extends StatefulWidget {
-  const Board_2_Screen({super.key});
-
-  @override
-  State<Board_2_Screen> createState() => _Board_2_ScreenState();
-}
-
-class _Board_2_ScreenState extends State<Board_2_Screen>{
+class Board_2_Screen extends StatelessWidget{
   final GlobalKey<DiceState> diceKey = GlobalKey<DiceState>();
 
   int r=0; //board row
   int j=0; //calculate board tile view index
   int viewIndex=0;
 
-  final Game game = Game(roundStep: 39, roundNum:1, playerNum: 4);
+  // final Board board = Board(roundStep: 39, roundNum:1, playerNum: 4);
   OverlayEntry? _overlayEntry;
 
   // when roll dice animation ends, add player score
-  void _rollDiceButton() async {
-    if(!game.isGameOver()){
+  void _rollDiceButton(model) async {
+    if(!model.board.isGameOver()){
       await diceKey.currentState?.rollDice().then((value){
         // _showQCardOverlay(context);
-        setState(() {
-          game.addPlayerSteps(value);
-          game.setCurrentPlayerIndex();
-        });
+        model.setDiceValue(value);
       });
     } else{
-      _showExitOverlay(context);
+      // _showExitOverlay(context);
     }
   }
 
@@ -59,7 +50,7 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
       },
     );
     // Add the OverlayEntry to the Overlay.
-    Overlay.of(context, debugRequiredFor: widget)?.insert(_overlayEntry!);
+    Overlay.of(context)?.insert(_overlayEntry!);
   }
   void _showExitOverlay(BuildContext context) {
     assert(_overlayEntry == null);
@@ -83,7 +74,7 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
       },
     );
     // Add the OverlayEntry to the Overlay.
-    Overlay.of(context, debugRequiredFor: widget)?.insert(_overlayEntry!);
+    Overlay.of(context)?.insert(_overlayEntry!);
   }
   void _hideOverlay() {
     _overlayEntry?.remove();
@@ -94,159 +85,162 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
   void dispose() {
     // Make sure to remove OverlayEntry when the widget is disposed.
     _hideOverlay();
-    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        // title: Text('Board'),
-        elevation: 0.00,
-        automaticallyImplyLeading: false, // hide back button
-        backgroundColor: Colors.transparent,
-        toolbarHeight: MediaQuery.of(context).size.height * 0.1,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 15.0),
-            child: ElevatedButton(
-              onPressed: () {
-                if(game.isGameOver()){
-                  Navigator.pushNamed(context, '/');
-                }else{
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Exit'),
-                          content: const Text(
-                            'Game is not over. Do you really want to exit game?',
-                          ),
-                          actions: <Widget>[
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                textStyle: Theme.of(context).textTheme.labelLarge,
+    return Consumer<Game>(
+      builder: (context, model, child) {
+        return Scaffold(
+          appBar: AppBar(
+            // title: Text('Board'),
+            elevation: 0.00,
+            automaticallyImplyLeading: false, // hide back button
+            backgroundColor: Colors.transparent,
+            toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 15.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if(model.board.isGameOver()){
+                      Navigator.pushNamed(context, '/');
+                    }else{
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Exit'),
+                              content: const Text(
+                                'Game is not over. Do you really want to exit game?',
                               ),
-                              child: const Text('Cancel'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                textStyle: Theme.of(context).textTheme.labelLarge,
-                              ),
-                              child: const Text('Exit'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.pushNamed(context, '/');
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                  );
-                }
-              },
-              child: const Text('Exit'),
-            ),
-          ),
-        ],
-      ),
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Container(
-            decoration:  BoxDecoration (
-              color:  Color(0xffe7edf2),
-            ),
-            width: MediaQuery.of(context).size.width * 0.6,
-            child: Center(
-              child: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 8,
-                  ),
-                  itemCount: 40,
-                  itemBuilder: (BuildContext context, int index) {
-                    r=(index~/8)%2;
-
-                    // if row is odd
-                    if(r!=0){
-                      // first tile of the row sets j value as 9
-                      // j value is decreasing until end of the tile
-                      // it calculate viewIndex which shows player moves
-                      if(index%8==0){
-                        j=7;
-                      }
-                      else{
-                        j=j-2;
-                      }
-                      viewIndex = index +j;
-
-                      return Container(
-                        padding: const EdgeInsets.all(5),
-                        margin: const EdgeInsets.all(1),
-                        color: Colors.teal[100],
-                        child: tileWidget(viewIndex),
+                              actions: <Widget>[
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    textStyle: Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    textStyle: Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                  child: const Text('Exit'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.pushNamed(context, '/');
+                                  },
+                                ),
+                              ],
+                            );
+                          },
                       );
                     }
-                    return Container(
-                      padding: const EdgeInsets.all(5),
-                      margin: const EdgeInsets.all(1),
-                      color: Colors.teal[100],
-                      child: tileWidget(index),
-                    );
-                  }
+                  },
+                  child: const Text('Exit'),
+                ),
               ),
-            ),
+            ],
           ),
-          GestureDetector(
-            onTap: _rollDiceButton,
-            child: Dice(key: diceKey)
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.2,
-            child:Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: game.players.length +1,
-                    itemBuilder: (context, index) {
-                      if(index== game.players.length){
-                        return ElevatedButton(
-                            onPressed: () {
-                              _showQCardOverlay(context);
-                            },
-                            child: const Text('Show Q-Card'));
+          body: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                decoration:  BoxDecoration (
+                  color:  Color(0xffe7edf2),
+                ),
+                width: MediaQuery.of(context).size.width * 0.6,
+                child: Center(
+                  child: GridView.builder(
+                      shrinkWrap: true,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 8,
+                      ),
+                      itemCount: 40,
+                      itemBuilder: (BuildContext context, int index) {
+                        r=(index~/8)%2;
+
+                        // if row is odd
+                        if(r!=0){
+                          // first tile of the row sets j value as 9
+                          // j value is decreasing until end of the tile
+                          // it calculate viewIndex which shows player moves
+                          if(index%8==0){
+                            j=7;
+                          }
+                          else{
+                            j=j-2;
+                          }
+                          viewIndex = index +j;
+
+                          return Container(
+                            padding: const EdgeInsets.all(5),
+                            margin: const EdgeInsets.all(1),
+                            color: Colors.teal[100],
+                            child: tileWidget(model, viewIndex),
+                          );
+                        }
+                        return Container(
+                          padding: const EdgeInsets.all(5),
+                          margin: const EdgeInsets.all(1),
+                          color: Colors.teal[100],
+                          child: tileWidget(model, index),
+                        );
                       }
-                      return ListTile(
-                        // shape: RoundedRectangleBorder(
-                        //   side: BorderSide(width: 1),
-                        //   borderRadius: BorderRadius.circular(5),
-                        // ),
-                        dense:true,
-                        leading: CircleAvatar(
-                          child: FlutterLogo(),
-                        ),
-                        title: Text(game.showMessageStep(index)),
-                        subtitle: Text(game.showMessageRound(index)),
-                        // title: Text('${game.players[index].index}: ${game.players[index].totalStep} steps/${game.players[index].roundNum} round'),
-                        // show activate player
-                        textColor: game.players[index].isOver ? Colors.black12: Colors.black,
-                        selected: game.isCurrentPlayerIndex(index) ? true : false,
-                      );
-                    },
                   ),
                 ),
-              ],
-            ),
-          )
-        ],
-      ),
+              ),
+              GestureDetector(
+                onTap: () => _rollDiceButton(model),
+                child: Dice(key: diceKey)
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.2,
+                child:Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: model.board.players.length +1,
+                        itemBuilder: (context, index) {
+                          if(index== model.board.players.length){
+                            return ElevatedButton(
+                                onPressed: () {
+                                  _showQCardOverlay(context);
+                                },
+                                child: const Text('Show Q-Card'));
+                          }
+                          return ListTile(
+                            // shape: RoundedRectangleBorder(
+                            //   side: BorderSide(width: 1),
+                            //   borderRadius: BorderRadius.circular(5),
+                            // ),
+                            dense:true,
+                            leading: CircleAvatar(
+                              child: FlutterLogo(),
+                            ),
+                            title: Text(model.board.showMessageStep(index)),
+                            subtitle: Text(model.board.showMessageRound(index)),
+                            // title: Text('${game.players[index].index}: ${game.players[index].totalStep} steps/${game.players[index].roundNum} round'),
+                            // show activate player
+                            textColor: model.board.players[index].isOver ? Colors.black12: Colors.black,
+                            selected: model.board.isCurrentPlayerIndex(index) ? true : false,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        );
+      }
     );
   }
-  tileWidget(tileIndex) => LayoutBuilder(
+  tileWidget(model, tileIndex) => LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         double parentWidth = constraints.maxWidth;
         double parentHeight = constraints.maxHeight;
@@ -300,16 +294,6 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
               )
           ),
           Positioned(
-              bottom: 0, // Position each widget vertically
-              left: 0, // Position each widget horizontally
-              child: Container(
-                width: childWidth,
-                height: childHeight,
-                color: Colors.green,
-                child: Text('3'),
-              )
-          ),
-          Positioned(
               bottom: 0, // Position each widget horizontally
               right: 0, // Position each widget vertically
               child: Container(
@@ -328,12 +312,12 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
                   color: Colors.teal[200],
                   child: Center(child: Text('Start')),
                 ),
-              if(tileIndex==game.roundStep)
+              if(tileIndex==model.board.roundStep)
                 Container(
                   color: Colors.teal[200],
                   child: Center(child: Text('End')),
                 ),
-              if(tileIndex!=0 && tileIndex!=game.roundStep)
+              if(tileIndex!=0 && tileIndex!=model.board.roundStep)
                 Center(
                   child: CircleAvatar(
                     minRadius: 10,
@@ -346,7 +330,7 @@ class _Board_2_ScreenState extends State<Board_2_Screen>{
 
               //Stack player widget
               for(int i=0; i<4; i++)...[
-                if(game.getPlayersByIndex(tileIndex, i))
+                if(model.board.getPlayersByIndex(tileIndex, i))
                   playerWidget[i],
               ]
             ]

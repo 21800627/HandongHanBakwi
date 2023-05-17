@@ -9,10 +9,16 @@ import 'package:handong_han_bakwi/src/MultiGameUI.dart';
 import 'package:handong_han_bakwi/src/RankingUI.dart';
 import 'package:handong_han_bakwi/src/WaitingGameUI.dart';
 
-
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'firebase_options.dart';
+import 'models/GAME.dart';
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // set display only in landscape
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
@@ -27,23 +33,31 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Handong Han Bakwi',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      initialRoute: '/',
-      routes: {
-        // When navigating to the "/" route, build the FirstScreen widget.
-        '/': (context) => const HomeScreen(),
-        '/diceExample': (context) => const DiceScreen(),
-        '/board_2_Example': (context) => const Board_2_Screen(),
-        '/boardExample': (context) => const BoardScreen(),
-        '/rankingExample': (context) => const RankingScreen(),
-        '/multiGameExample': (context) => const MultiGameScreen(),
-        '/HostGamePage' : (context) => const HostGamePage(),
-        '/WaitingPage' : (context) => const WaitingGameScreen(),
-      },
+
+    Game game= Game();
+
+    return ChangeNotifierProvider(
+      create: (_) => game,
+      builder: (context, snapshot) {
+        return MaterialApp(
+          title: 'Handong Han Bakwi',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          initialRoute: '/',
+          routes: {
+            // When navigating to the "/" route, build the FirstScreen widget.
+            '/': (context) => const HomeScreen(),
+            '/diceExample': (context) => const DiceScreen(),
+            '/board_2_Example': (_) => ChangeNotifierProvider.value(value: game, child: Board_2_Screen()),
+            '/boardExample': (context) => const BoardScreen(),
+            '/rankingExample': (context) => const RankingScreen(),
+            '/multiGameExample': (_) => ChangeNotifierProvider.value(value: game, child: MultiGameScreen()),
+            '/HostGamePage' : (context) => const HostGamePage(),
+            '/WaitingPage' : (context) => const WaitingGameScreen(),
+          },
+        );
+      }
     );
   }
 }

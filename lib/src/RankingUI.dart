@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:handong_han_bakwi/models/QUESTION.dart';
 
-import '../models/GAME.dart';
+import '../models/BOARD.dart';
 import '../widgets/Dice.dart';
 import '../widgets/QCard.dart';
 
@@ -15,7 +15,7 @@ class RankingScreen extends StatefulWidget {
 class _RankingScreenState extends State<RankingScreen> {
   final GlobalKey<DiceState> diceKey = GlobalKey<DiceState>();
 
-  final Game game = Game();
+  final Board board = Board();
   OverlayEntry? _overlayEntry;
 
   int playerNum=0;
@@ -25,14 +25,14 @@ class _RankingScreenState extends State<RankingScreen> {
   void _getGameRound(value){
     int num = int.tryParse(value) ?? 0;
     setState(() {
-      game.setGameRound(num);
+      board.setGameRound(num);
     });
   }
 
   void _getPlayerNumber(value){
     int num = int.tryParse(value) ?? 0;
     setState(() {
-      game.setPlayers(num);
+      board.setPlayers(num);
     });
   }
   // when roll dice animation ends, add player score
@@ -42,8 +42,8 @@ class _RankingScreenState extends State<RankingScreen> {
     });
     await diceKey.currentState?.rollDice().then((value){
       setState(() {
-        game.addPlayerSteps(value);
-        game.setCurrentPlayerIndex();
+        board.addPlayerSteps(value);
+        board.setCurrentPlayerIndex();
       });
     });
 
@@ -99,9 +99,9 @@ class _RankingScreenState extends State<RankingScreen> {
           children: [
             Column(
               children: [
-                Text('Total Steps: ${game.totalStep}',style: Theme.of(context).textTheme.bodyText2),
+                Text('Total Steps: ${board.totalStep}',style: Theme.of(context).textTheme.bodyText2),
                 // show 'Game Over!' when all player reach the steps
-                game.isGameOver()?
+                board.isGameOver()?
                   Text(
                     'Game Over!',
                       style: Theme.of(context).textTheme.headline3
@@ -145,13 +145,13 @@ class _RankingScreenState extends State<RankingScreen> {
                   height: MediaQuery.of(context).size.height * 0.5,
                   child: Expanded(
                     child: ListView.builder(
-                      itemCount: game.players.length,
+                      itemCount: board.players.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text('${game.players[index].index}: ${game.players[index].totalStep} steps/${game.players[index].roundNum} round'),
+                          title: Text('${board.players[index].index}: ${board.players[index].totalStep} steps/${board.players[index].roundNum} round'),
                           // show activate player
-                          textColor: game.players[index].isOver ? Colors.black12: Colors.black,
-                          selected: game.isCurrentPlayerIndex(index) ? true : false,
+                          textColor: board.players[index].isOver ? Colors.black12: Colors.black,
+                          selected: board.isCurrentPlayerIndex(index) ? true : false,
                         );
                       },
                     ),

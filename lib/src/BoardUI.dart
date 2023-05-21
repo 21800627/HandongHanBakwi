@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class BoardScreen extends StatefulWidget {
   const BoardScreen({super.key});
@@ -9,6 +8,8 @@ class BoardScreen extends StatefulWidget {
 }
 
 class _BoardScreenState extends State<BoardScreen>{
+  final int _boardCol=8;
+  final int _boardTileCount=40;
 
   @override
   Widget build(BuildContext context) {
@@ -16,84 +17,80 @@ class _BoardScreenState extends State<BoardScreen>{
       appBar: AppBar(
         title: Text('Board'),
       ),
-      body: Wrap(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.5,
-            // height: MediaQuery.of(context).size.height,
-            margin: const EdgeInsets.all(10.0),
-            child: StaggeredGrid.count(
-              crossAxisCount: 10,
-              mainAxisSpacing: 6,
-              crossAxisSpacing: 6,
-              children: [
-                for(int i = 0; i<28; i++)...[
-                  // board center
-                  if (i==11)
-                    const StaggeredGridTile.count(
-                      crossAxisCellCount: 8,
-                      mainAxisCellCount: 4,
-                      child: Tile(index: 11,backgroundColor: Colors.orangeAccent,),
-                    ),
-                  StaggeredGridTile.count(
-                    crossAxisCellCount: 1,
-                    mainAxisCellCount: 1,
-                    child: Tile(index: i,bottomSpace: 10,),
-                  ),
-                ]
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class Tile extends StatelessWidget {
-  const Tile({
-    Key? key,
-    required this.index,
-    this.extent,
-    this.backgroundColor,
-    this.bottomSpace,
-  }) : super(key: key);
-
-  final int index;
-  final double? extent;
-  final double? bottomSpace;
-  final Color? backgroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    const _defaultColor = Colors.grey;
-
-    final child = Container(
-      color: backgroundColor ?? _defaultColor,
-      height: extent,
-      child: Center(
-        child: CircleAvatar(
-          minRadius: 20,
-          maxRadius: 20,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          child: Text('$index', style: const TextStyle(fontSize: 20)),
+      body: Center(
+        child: Container(
+          padding: EdgeInsets.all(8),
+          width: MediaQuery.of(context).size.width*0.8,
+          child: _buildBoard(),
         ),
-      ),
-    );
-
-    if (bottomSpace == null) {
-      return child;
-    }
-
-    return Column(
-      children: [
-        Expanded(child: child),
-        Container(
-          height: bottomSpace,
-          color: Colors.green,
-        )
-      ],
+      )
     );
   }
+  _buildBoard() => Builder(
+      builder: (context) {
+        int boardRow=0; //board row
+        int j=0; //calculate board tile view index
+        int viewIndex=0;
+        int colorValue=0;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: _boardCol,
+          ),
+          itemCount: _boardTileCount,
+          itemBuilder: (BuildContext context, int index){
+
+            boardRow=(index~/_boardCol)%2;
+
+            if(index==0 || index==_boardTileCount-1) {
+              colorValue = 0xffC4DFDF;
+            } else {
+              colorValue=0xffD2E9E9;
+            }
+            // if row is odd
+            if(boardRow!=0){
+              // first tile of the row sets j value as 9
+              // j value is decreasing until end of the tile
+              // it calculate viewIndex which shows player moves
+              if(index%_boardCol==0){
+                j=_boardCol-1;
+              }
+              else{
+                j=j-2;
+              }
+              viewIndex = index +j;
+            }else{
+              viewIndex=index;
+            }
+            return Card(
+              // padding: const EdgeInsets.all(5),
+              margin: const EdgeInsets.all(3),
+              color: Color(colorValue),
+              elevation: 2,
+              child: _buildTile(viewIndex),
+              // child: _buildTile(model, viewIndex),
+            );
+          },
+        );
+      }
+  );
+
+  // _buildTile(model, tileIndex) => LayoutBuilder(
+  _buildTile(tileIndex) => LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Stack(
+            children: [
+              if(tileIndex==0)
+                Center(child: Text('Start', style: const TextStyle(fontSize: 15, color: Color(0xffF8F6F4)))),
+              if(tileIndex==_boardTileCount)
+                Center(child: Text('End', style: const TextStyle(fontSize: 15, color: Color(0xffF8F6F4)))),
+              if(tileIndex!=0 && tileIndex!=_boardTileCount)
+                Center(
+                  child: Text('$tileIndex', style: const TextStyle(fontSize: 15, color: Color(0xffF8F6F4))),
+                ),
+            ]
+        );
+      }
+  );
 }

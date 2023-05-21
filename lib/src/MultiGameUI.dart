@@ -3,9 +3,32 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../models/GAME.dart';
+import '../util.dart';
 
 class MultiGameScreen extends StatelessWidget{
-  const MultiGameScreen({super.key});
+  MultiGameScreen({super.key});
+
+  String _hostCode='';
+  int _roundNum=0;
+  int _playerNum=0;
+
+  String _joinCode='';
+  String _playerName='';
+
+  void _hostGameOnPressed(model){
+    model.hostGame(_hostCode, _roundNum, _playerNum);
+  }
+  void _joinGameOnPressed(context, model){
+    model.joinGame(_joinCode, _playerName);
+    showWarningMessage(context, 'warning','hello');
+  }
+  void _enterGameOnPressed(context, model){
+    Navigator.pushNamed(
+      context,
+      '/board_2_Example',
+      arguments: model, // Pass the game object as arguments
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +58,7 @@ class MultiGameScreen extends StatelessWidget{
                                   labelText: 'Enter Host Code',
                                 ),
                                 onChanged: (value) {
-                                  model.setHostCode(value);
+                                  _hostCode= value;
                                 },
                               ),
                             ),
@@ -70,7 +93,7 @@ class MultiGameScreen extends StatelessWidget{
                                   labelText: 'Enter Game Round',
                                 ),
                                 onChanged: (value) {
-                                  model.setRoundNum(int.parse(value));
+                                  _roundNum = int.tryParse(value) ?? 0;
                                 },
                               ),
                             ),
@@ -85,7 +108,7 @@ class MultiGameScreen extends StatelessWidget{
                                   labelText: 'Enter Player number',
                                 ),
                                 onChanged: (value) {
-                                  model.setPlayerNum(int.parse(value));
+                                  _playerNum = int.tryParse(value) ?? 0;
                                 },
                               ),
                             ),
@@ -96,9 +119,7 @@ class MultiGameScreen extends StatelessWidget{
                     Container(
                       margin: const EdgeInsets.all(5.0),
                       child: ElevatedButton(
-                        onPressed: (){
-                          model.hostGame();
-                        },
+                        onPressed: ()=> _hostGameOnPressed(model),
                         child: const Text('Host Game'),
                       ),
                     ),
@@ -115,7 +136,7 @@ class MultiGameScreen extends StatelessWidget{
                               labelText: 'Enter host code',
                             ),
                             onChanged: (value) {
-                              model.hostGame();
+                              _joinCode=value;
                             },
                           ),
                         ),
@@ -130,7 +151,7 @@ class MultiGameScreen extends StatelessWidget{
                               labelText: 'Enter player name',
                             ),
                             onChanged: (value) {
-                              model.setPlayerName(value);
+                              _playerName= value;
                             },
                           ),
                         ),
@@ -139,7 +160,7 @@ class MultiGameScreen extends StatelessWidget{
                     Container(
                       margin: const EdgeInsets.all(5.0),
                       child: ElevatedButton(
-                        onPressed: (){},
+                        onPressed: ()=>_joinGameOnPressed(context, model),
                         child: const Text('Join Game'),
                       ),
                     ),
@@ -147,28 +168,26 @@ class MultiGameScreen extends StatelessWidget{
                 ),
                 Column(
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: MediaQuery.of(context).size.width * 0.3,
-                      height: MediaQuery.of(context).size.height * 0.6,
-                      child: Expanded(
-                        child: ListView(
-                          children: [
-                            ...model.players.map((p)=>Card(
-                              child: ListTile(
-                                  title: Text('${p.index}:')
-                              ),
-                            ))
-                          ],
-                        ),
-                      ),
-                    ),
+                    // Container(
+                    //   padding: EdgeInsets.all(5.0),
+                    //   width: MediaQuery.of(context).size.width * 0.3,
+                    //   height: MediaQuery.of(context).size.height * 0.6,
+                    //   child: Expanded(
+                    //     child: ListView(
+                    //       children: [
+                    //         ...model.board.players.map((p)=>Card(
+                    //           child: ListTile(
+                    //               title: Text('${p.name}:')
+                    //           ),
+                    //         ))
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                     Container(
                       margin: const EdgeInsets.all(5.0),
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/board_2_Example');
-                        },
+                        onPressed: () => _enterGameOnPressed(context, model),
                         child: const Text('Enter Game'),
                       ),
                     ),

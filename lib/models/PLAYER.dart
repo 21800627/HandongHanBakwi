@@ -10,4 +10,11 @@ class Player{
   String name;
 
   Player({required this.index, this.name='', this.roundStep=0,this.roundNum=1,this.totalStep=0, this.score=0});
+
+  String showTotalStep(){
+    return '${totalStep} steps';
+  }
+  String showRoundNum(){
+    return '${roundNum} round';
+  }
 }

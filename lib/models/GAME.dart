@@ -1,46 +1,126 @@
+import 'dart:async';
+
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'BOARD.dart';
 import 'PLAYER.dart';
 
 class Game extends ChangeNotifier{
+  final DatabaseReference _database = FirebaseDatabase.instance.ref();
+  static const GAME_PATH = 'game';
+  static const PLAYER_PATH = 'players';
+
+  late StreamSubscription<DatabaseEvent> _gameStream;
+  late StreamSubscription<DatabaseEvent> _playerStream;
+
   String hostCode = '';
   int diceValue=0;
   String question='';
 
+  int currentPlayerNum=0;
   int playerNum=0;
   int currentPlayerIndex=0; // current player index that is activated
   int roundStep=39;
   int roundNum=0;
   int totalStep=39;
 
+  List<Game> _games = [];
+  List<Game> get games => _games;
+
   List<Player> _players = [];
   List<Player> get players => _players;
 
+  Game({this.hostCode='',this.playerNum=0,this.roundNum=0, this.currentPlayerNum=0,}){
+    // _listenToGames();
+    // _listenToPlayers();
+  }
+
+  factory Game.fromRTDB(Map<String, dynamic> data){
+    final key = data.keys.first;
+    return Game(
+      hostCode: key,
+      playerNum: data[key]['playerNum'] ?? 0,
+      roundNum: data[key]['roundNum'] ?? 0,
+      currentPlayerNum: data[key]['currentPlayerNum'] ?? 0,
+    );
+  }
+
+  @override
+  void dispose(){
+    _gameStream.cancel();
+    _playerStream.cancel();
+    super.dispose();
+  }
+
+  Stream<List<Player>> getPlayerStream(){
+    final results = _database.child('players').onValue;
+    final playerStream = results.map((event){
+      final playerMap = event.snapshot.value as Map<String, dynamic>;
+      final playerList = playerMap.entries.map((el){
+        return Player.fromRTDB(el.value as Map<String, dynamic>);
+      }).toList();
+      return playerList;
+    });
+    return playerStream;
+  }
+
+  Stream<List<Game>> getGameStream(){
+    final results = _database.child('game').onValue;
+    final gameStream = results.map((event){
+      final gameMap = event.snapshot.value as Map<String, dynamic>;
+      final gameList = gameMap.entries.map((el){
+        return Game.fromRTDB(el.value as Map<String, dynamic>);
+      }).toList();
+      return gameList;
+    });
+    return gameStream;
+  }
+  void _listenToGames(){
+    _gameStream = _database.child(GAME_PATH).onValue.listen((event) {
+      final allGames = event.snapshot.value as Map<String, dynamic>;
+      _games = allGames.values
+          .map((data) => Game.fromRTDB(data as Map<String, dynamic>))
+          .toList();
+    });
+  }
+  void _listenToPlayers(){
+    _playerStream = _database.child(PLAYER_PATH).child(hostCode).onValue.listen((event) {
+      final allPlayers = event.snapshot.value as Map<String, dynamic>;
+      _players = allPlayers.values
+          .map((data) => Player.fromRTDB(data as Map<String, dynamic>))
+          .toList();
+      notifyListeners();
+    });
+  }
   bool isGameOver(){
     return playerNum>0 && players.indexWhere((p) => p.isOver) != -1;
   }
 
-  void hostGame(String hostCode, int roundNum, int playerNum){
-    //TODO: check host code
-    this.hostCode = hostCode;
-    this.roundNum = roundNum;
-    this.playerNum = playerNum;
-
-    totalStep = roundStep*this.roundNum;
+  Future<void> hostGame(String hostCode, int roundNum, int playerNum) async{
     currentPlayerIndex=0;
-
-    _players = List<Player>.generate(playerNum, (i) => Player(index: i+1, roundStep: roundStep, roundNum: roundNum));
-
+    _database.child(GAME_PATH).update({
+      hostCode: {
+        'roundNum': roundNum,
+        'playerNum': playerNum,
+        'totalStep': roundStep * roundNum,
+      }
+    });
     notifyListeners();
   }
 
-  void joinGame(String joinCode, String playerName){
-    //TODO: check join code
-    // if(hostCode == joinCode){
-    //   int index = board.players.indexWhere((p)=> p.name == '');
-    //   board.players[index].name = playerName;
-    // }
+  void joinGame(String joinCode, String playerName) async{
+    // get currentPlayerNum
+    String? currentIndex='';
+    final snapshot = await _database.child(GAME_PATH).child(joinCode).child('currentPlayerNum').get();
+    if(snapshot.exists){
+      currentIndex = (snapshot.value ?? 0) as String?;
+    }
+    _database.child(PLAYER_PATH).push().set({
+      'hostCode': joinCode,
+      'name': playerName,
+      'index': currentIndex,
+    });
     notifyListeners();
   }
 

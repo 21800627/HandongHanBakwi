@@ -6,6 +6,7 @@ import 'package:handong_han_bakwi/src/DiceUI.dart';
 import 'package:handong_han_bakwi/src/HomeUI.dart';
 import 'package:handong_han_bakwi/src/HostGameUI.dart';
 import 'package:handong_han_bakwi/src/MultiGameUI.dart';
+import 'package:handong_han_bakwi/src/RankingUI.dart';
 import 'package:handong_han_bakwi/src/WaitingGameUI.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -29,7 +30,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
 
@@ -48,9 +48,8 @@ class MyApp extends StatelessWidget {
             // When navigating to the "/" route, build the FirstScreen widget.
             '/': (context) => const HomeScreen(),
             '/diceExample': (context) => const DiceScreen(),
-            // '/board_2_Example': (context) => const Board_2_Screen(),
             '/board_2_Example': (_) => ChangeNotifierProvider.value(
-                value: Provider.of<Game>(context, listen: true),
+                value: Provider.of<Game>(context),
               child: Consumer<Game>(
                 builder: (context, game, _) => Board_2_Screen(
                   roundNum: game.roundNum,
@@ -59,17 +58,10 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             ),
-            // '/board_2_Example': (context) => Consumer<Game>(
-            //   builder: (context, game, _) => Board_2_Screen(
-            //     roundNum: game.roundNum,
-            //     roundStep: 39,
-            //     playerNum: game.playerNum,
-            //   ),
-            // ),
             '/boardExample': (context) => const BoardScreen(),
-            // '/rankingExample': (context) => const RankingScreen(),
-            '/rankingExample': (context) => const BoardScreen(),
-            '/multiGameExample': (_) => ChangeNotifierProvider.value(value: Provider.of<Game>(context, listen: true), child: MultiGameScreen()),
+            '/rankingExample': (context) => const RankingScreen(),
+            // '/rankingExample': (context) => const BoardScreen(),
+            '/multiGameExample': (_) => ChangeNotifierProvider.value(value: Provider.of<Game>(context), child: MultiGameScreen()),
             '/HostGamePage' : (context) => const HostGamePage(),
             '/WaitingPage' : (context) => const WaitingGameScreen(),
           },

@@ -15,9 +15,24 @@ class MultiGameScreen extends StatelessWidget{
   String _joinCode='';
   String _playerName='';
 
-  void _hostGameOnPressed(model){
-    model.hostGame(_hostCode, _roundNum, _playerNum);
+  void _hostGameOnPressed(context, model){
+    model.hostGame(_hostCode, _roundNum, _playerNum)
+        .then((_){
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Operation completed successfully'),
+            ),
+          );
+        }).catchError((error) {
+          // Error occurred during the function execution
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $error'),
+            ),
+          );
+        });
   }
+
   void _joinGameOnPressed(context, model){
     model.joinGame(_joinCode, _playerName);
     showWarningMessage(context, 'warning','hello');
@@ -119,7 +134,7 @@ class MultiGameScreen extends StatelessWidget{
                     Container(
                       margin: const EdgeInsets.all(5.0),
                       child: ElevatedButton(
-                        onPressed: ()=> _hostGameOnPressed(model),
+                        onPressed: ()=> _hostGameOnPressed(context, model),
                         child: const Text('Host Game'),
                       ),
                     ),
@@ -129,7 +144,6 @@ class MultiGameScreen extends StatelessWidget{
                           width: MediaQuery.of(context).size.width * 0.3,
                           padding: EdgeInsets.all(5.0),
                           child: TextFormField(
-                            keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                               border: OutlineInputBorder(),
@@ -144,7 +158,6 @@ class MultiGameScreen extends StatelessWidget{
                           width: MediaQuery.of(context).size.width * 0.3,
                           padding: EdgeInsets.all(5.0),
                           child: TextFormField(
-                            keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                               border: OutlineInputBorder(),
@@ -168,22 +181,22 @@ class MultiGameScreen extends StatelessWidget{
                 ),
                 Column(
                   children: [
-                    // Container(
-                    //   padding: EdgeInsets.all(5.0),
-                    //   width: MediaQuery.of(context).size.width * 0.3,
-                    //   height: MediaQuery.of(context).size.height * 0.6,
-                    //   child: Expanded(
-                    //     child: ListView(
-                    //       children: [
-                    //         ...model.board.players.map((p)=>Card(
-                    //           child: ListTile(
-                    //               title: Text('${p.name}:')
-                    //           ),
-                    //         ))
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
+                    Container(
+                      padding: EdgeInsets.all(5.0),
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      height: MediaQuery.of(context).size.height * 0.6,
+                      child: Expanded(
+                        child: ListView(
+                          children: [
+                            ...model.games.map((g)=>Card(
+                              child: ListTile(
+                                  title: Text('${g.hostCode}:')
+                              ),
+                            ))
+                          ],
+                        ),
+                      ),
+                    ),
                     Container(
                       margin: const EdgeInsets.all(5.0),
                       child: ElevatedButton(

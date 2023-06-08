@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:handong_han_bakwi/models/BOARD.dart';
 
 class BoardScreen extends StatefulWidget {
   const BoardScreen({super.key});

@@ -16,7 +16,8 @@ class MultiGameScreen extends StatelessWidget{
   String _playerName='';
 
   void _hostGameOnPressed(context, model){
-    model.hostGame(_hostCode, _roundNum, _playerNum)
+    // model.hostGame(_hostCode, _roundNum, _playerNum)
+    model.hostGame(_hostCode, 1, 4)
         .then((_){
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -40,7 +41,7 @@ class MultiGameScreen extends StatelessWidget{
   void _enterGameOnPressed(context, model){
     Navigator.pushNamed(
       context,
-      '/board_2_Example',
+      '/StartGame',
       arguments: model, // Pass the game object as arguments
     );
   }
@@ -90,7 +91,8 @@ class MultiGameScreen extends StatelessWidget{
                                 child: SelectableText(
                                   model.hostCode,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),                            ),
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ],
@@ -101,6 +103,7 @@ class MultiGameScreen extends StatelessWidget{
                               width: MediaQuery.of(context).size.width * 0.3,
                               padding: EdgeInsets.all(5.0),
                               child: TextFormField(
+                                readOnly: true,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -116,6 +119,7 @@ class MultiGameScreen extends StatelessWidget{
                               width: MediaQuery.of(context).size.width * 0.3,
                               padding: EdgeInsets.all(5.0),
                               child: TextFormField(
+                                readOnly: true,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),

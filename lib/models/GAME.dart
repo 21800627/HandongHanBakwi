@@ -31,9 +31,13 @@ class Game extends ChangeNotifier{
   List<Player> _players = [];
   List<Player> get players => _players;
 
+  Board board = Board(roundStep: 39, roundNum:1, playerNum: 4);
+
   Game({this.hostCode='',this.playerNum=0,this.roundNum=0, this.currentPlayerNum=0,}){
     // _listenToGames();
     // _listenToPlayers();
+    _players = List<Player>.generate(playerNum, (i) => Player(index: i+1, roundStep: roundStep, roundNum: roundNum));
+    board = Board(roundStep: 39, roundNum:1, playerNum: 4);
   }
 
   factory Game.fromRTDB(Map<String, dynamic> data){
@@ -48,8 +52,8 @@ class Game extends ChangeNotifier{
 
   @override
   void dispose(){
-    _gameStream.cancel();
-    _playerStream.cancel();
+    // _gameStream.cancel();
+    // _playerStream.cancel();
     super.dispose();
   }
 
@@ -99,11 +103,12 @@ class Game extends ChangeNotifier{
 
   Future<void> hostGame(String hostCode, int roundNum, int playerNum) async{
     currentPlayerIndex=0;
-    _database.child(GAME_PATH).update({
+    _database.child(GAME_PATH).set({
       hostCode: {
         'roundNum': roundNum,
         'playerNum': playerNum,
         'totalStep': roundStep * roundNum,
+        'currentPlayerNum': 0,
       }
     });
     notifyListeners();
@@ -112,7 +117,7 @@ class Game extends ChangeNotifier{
   void joinGame(String joinCode, String playerName) async{
     // get currentPlayerNum
     String? currentIndex='';
-    final snapshot = await _database.child(GAME_PATH).child(joinCode).child('currentPlayerNum').get();
+    final snapshot = await _database.child(GAME_PATH).child(joinCode).get();
     if(snapshot.exists){
       currentIndex = (snapshot.value ?? 0) as String?;
     }
@@ -137,7 +142,7 @@ class Game extends ChangeNotifier{
     return question;
   }
 
-  void addPlayerSteps(int diceValue, Board board) {
+  void addPlayerSteps(int diceValue) {
     // find current player index
     int index = players.indexWhere((p) => !p.isOver, currentPlayerIndex);
     // if player is not over calculate player total step
@@ -153,12 +158,11 @@ class Game extends ChangeNotifier{
       if (players[currentPlayerIndex].totalStep >= totalStep) {
         players[currentPlayerIndex].isOver = true;
         players[currentPlayerIndex].roundNum = roundNum;
-        return;
       }else{
         board.addCurrentPlayerIndex(players[currentPlayerIndex]);
-        return;
       }
     }
+    notifyListeners();
   }
 
   void setCurrentPlayerIndex(){
@@ -178,6 +182,7 @@ class Game extends ChangeNotifier{
       int index = players.indexWhere((p) => !p.isOver);
       currentPlayerIndex = index;
     }
+    notifyListeners();
   }
 
   bool isCurrentPlayerIndex(int index){

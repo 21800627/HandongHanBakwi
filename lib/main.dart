@@ -48,7 +48,18 @@ class MyApp extends StatelessWidget {
             // When navigating to the "/" route, build the FirstScreen widget.
             '/': (context) => const HomeScreen(),
             '/diceExample': (context) => const DiceScreen(),
+            // '/board_2_Example': (context) => Board_2_Screen(roundNum: 1, roundStep: 39, playerNum: 4,),
             '/board_2_Example': (_) => ChangeNotifierProvider.value(
+              value: Game(roundNum: 1,playerNum: 4),
+              child: Consumer<Game>(
+                builder: (context, game, _) => Board_2_Screen(
+                  roundNum: 1,
+                  roundStep: 39,
+                  playerNum: 4,
+                ),
+              ),
+            ),
+            '/StartGame': (_) => ChangeNotifierProvider.value(
                 value: Provider.of<Game>(context),
               child: Consumer<Game>(
                 builder: (context, game, _) => Board_2_Screen(
@@ -58,7 +69,7 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             ),
-            '/boardExample': (context) => const BoardScreen(),
+            // '/boardExample': (context) => const BoardScreen(),
             '/rankingExample': (context) => const RankingScreen(),
             // '/rankingExample': (context) => const BoardScreen(),
             '/multiGameExample': (_) => ChangeNotifierProvider.value(value: Provider.of<Game>(context), child: MultiGameScreen()),

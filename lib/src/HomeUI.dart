@@ -59,92 +59,143 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('Game Design',style: Theme.of(context).textTheme.titleLarge),
-              Text('Test Page',style: Theme.of(context).textTheme.bodyLarge),
+            children: [
               Container(
-                margin: const EdgeInsets.only(top: 10.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/boardExample');
-                  },
-                  child: const Text('Show Board'),
+                padding: EdgeInsets.all(5.0),
+                child: Column(
+                  children: [
+                    Text('Handong Han Bakwi',style: Theme.of(context).textTheme.titleLarge),
+                    Text('Walk Around with Your Friends',style: Theme.of(context).textTheme.bodySmall),
+                  ],
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/diceExample');
-                },
-                child: const Text('Show Dice'),
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/images/player1.png',
+                    width: 50,
+                    height: 50,
+                  ),
+                  Image.asset(
+                    'assets/images/player2.png',
+                    width: 50,
+                    height: 50,
+                  ),
+                ],
               ),
-              ElevatedButton(
-                onPressed: () {
-                  _showOverlay(context);
-                },
-                child: const Text('Show Q-Card'),
-              ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('Data Flow',style: Theme.of(context).textTheme.titleLarge),
-              Text('Test Page',style: Theme.of(context).textTheme.bodyLarge),
-              Container(
-                margin: const EdgeInsets.only(top: 10.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/rankingExample');
-                  },
-                  child: const Text('Player Ranking'),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/multiGameExample');
-                },
-                child: const Text('Multi Game Player'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/board_2_Example');
-                },
-                child: const Text('Board Grid'),
-              ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                margin: const EdgeInsets.all(5.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/HostGamePage');
-                  },
-                  child: const Text('Host Game'),
-                ),
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/images/player3.png',
+                    width: 50,
+                    height: 50,
+                  ),
+                  Image.asset(
+                    'assets/images/player4.png',
+                    width: 50,
+                    height: 50,
+                  ),
+                ],
               ),
               Container(
-                margin: const EdgeInsets.all(5.0),
+                width: 200,
                 child: ElevatedButton(
                   onPressed: () {
-                    //Navigator.pushNamed(context, '/JoinPage');
+                    Navigator.pushNamed(context, '/board_2_Example');
                   },
-                  child: const Text('Join Game'),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.all(5.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/WaitingPage');
-                  },
-                  child: const Text('Waiting Game'),
+                  child: const Text('Start Game'),
                 ),
               ),
             ],
           ),
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: <Widget>[
+          //     Text('Game Design',style: Theme.of(context).textTheme.titleLarge),
+          //     Text('Test Page',style: Theme.of(context).textTheme.bodyLarge),
+          //     Container(
+          //       margin: const EdgeInsets.only(top: 10.0),
+          //       child: ElevatedButton(
+          //         onPressed: () {
+          //           Navigator.pushNamed(context, '/boardExample');
+          //         },
+          //         child: const Text('Show Board'),
+          //       ),
+          //     ),
+          //     ElevatedButton(
+          //       onPressed: () {
+          //         Navigator.pushNamed(context, '/diceExample');
+          //       },
+          //       child: const Text('Show Dice'),
+          //     ),
+          //     ElevatedButton(
+          //       onPressed: () {
+          //         _showOverlay(context);
+          //       },
+          //       child: const Text('Show Q-Card'),
+          //     ),
+          //   ],
+          // ),
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: <Widget>[
+          //     Text('Data Flow',style: Theme.of(context).textTheme.titleLarge),
+          //     Text('Test Page',style: Theme.of(context).textTheme.bodyLarge),
+          //     Container(
+          //       margin: const EdgeInsets.only(top: 10.0),
+          //       child: ElevatedButton(
+          //         onPressed: () {
+          //           Navigator.pushNamed(context, '/rankingExample');
+          //         },
+          //         child: const Text('Player Ranking'),
+          //       ),
+          //     ),
+          //     ElevatedButton(
+          //       onPressed: () {
+          //         Navigator.pushNamed(context, '/multiGameExample');
+          //       },
+          //       child: const Text('Multi Game Player'),
+          //     ),
+          //     ElevatedButton(
+          //       onPressed: () {
+          //         Navigator.pushNamed(context, '/board_2_Example');
+          //       },
+          //       child: const Text('Board Grid'),
+          //     ),
+          //   ],
+          // ),
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: <Widget>[
+          //     Container(
+          //       margin: const EdgeInsets.all(5.0),
+          //       child: ElevatedButton(
+          //         onPressed: () {
+          //           Navigator.pushNamed(context, '/HostGamePage');
+          //         },
+          //         child: const Text('Host Game'),
+          //       ),
+          //     ),
+          //     Container(
+          //       margin: const EdgeInsets.all(5.0),
+          //       child: ElevatedButton(
+          //         onPressed: () {
+          //           //Navigator.pushNamed(context, '/JoinPage');
+          //         },
+          //         child: const Text('Join Game'),
+          //       ),
+          //     ),
+          //     Container(
+          //       margin: const EdgeInsets.all(5.0),
+          //       child: ElevatedButton(
+          //         onPressed: () {
+          //           Navigator.pushNamed(context, '/WaitingPage');
+          //         },
+          //         child: const Text('Waiting Game'),
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );

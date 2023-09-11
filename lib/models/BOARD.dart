@@ -9,7 +9,7 @@ class Board {
 
   List<List<Player>> tileIndex = List.filled(0,[]);
 
-  Board({required this.roundStep, required this.roundNum, required this.playerNum}){
+  Board({this.roundStep=39, this.roundNum=1, this.playerNum=4}){
     totalStep = roundStep*roundNum;
     currentPlayerIndex=0;
     // players = List<Player>.generate(playerNum, (i) => Player(index: i+1, roundStep: roundStep, roundNum: roundNum));

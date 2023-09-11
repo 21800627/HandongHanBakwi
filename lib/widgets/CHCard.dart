@@ -10,7 +10,13 @@ class CHCard extends StatefulWidget {
 
 class _CHCardState extends State<CHCard> {
   int clickedCardIndex = -1; // 클릭된 서브 카드의 인덱스
-  List<String> subCardTexts = ['Sub Card 1', 'Sub Card 2', 'Sub Card 3'];
+  List<String> subCardImages = [
+    'assets/images/3.png',  //다른 이미지로 바꾸기
+    'assets/images/4.png',  //다른 이미지로 바꾸기
+    'assets/images/5.png',  //다른 이미지로 바꾸기
+  ];
+
+  List<bool> subCardClickable = [true, true, true]; // 카드 클릭 가능 여부
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +70,10 @@ class _CHCardState extends State<CHCard> {
           children: <Widget>[
             Text(
               mainCardText,
-              style:
-              Theme.of(context).textTheme.headline6!.copyWith(fontSize: 24.0),
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6!
+                  .copyWith(fontSize: 24.0),
             ),
             SizedBox(height: 16.0),
             Row(
@@ -83,50 +91,76 @@ class _CHCardState extends State<CHCard> {
   }
 
   Widget _buildSubCard(BuildContext context, int index) {
-    bool isClickable = clickedCardIndex == -1 || clickedCardIndex == index;
-    double scaleFactor = clickedCardIndex == index ? 1.2 : 1.0;
-    String subCardText =
-    isClickable ? (clickedCardIndex == index ? '50 코인 당첨' : subCardTexts[index]) : '꽝';
+    bool isClickable = subCardClickable[index];
+    double scaleFactor = clickedCardIndex == index ? 1.3 : 1.0;
+    String subCardImage = subCardImages[index];
+    bool isClicked = clickedCardIndex == index;
+    String subCardText = isClicked ? '50 코인 당첨' : '';
 
     return GestureDetector(
       onTap: isClickable
           ? () {
         // Handle sub card tap
-        print('Tapped on Sub Card: ${subCardTexts[index]}');
-        _toggleSubCard(index);
+        if (!isClicked) {
+          print('Tapped on Sub Card: $index');
+          _toggleSubCard(index);
+        }
       }
           : null,
-      child: AnimatedContainer(
-        width: MediaQuery.of(context).size.width * 0.1 * scaleFactor,
-        height: MediaQuery.of(context).size.height * 0.1 * scaleFactor,
-        duration: Duration(milliseconds: 500),
-        padding: EdgeInsets.all(8.0),
-        margin: EdgeInsets.all(4.0),
-        decoration: BoxDecoration(
-          color: isClickable ? Colors.white : Colors.grey.withOpacity(0.5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 3,
-              blurRadius: 5,
-              offset: Offset(0, 2),
+      child: Stack(
+        children: [
+          AnimatedContainer(
+            width: MediaQuery.of(context).size.width * 0.1 * scaleFactor,
+            height: MediaQuery.of(context).size.height * 0.1 * scaleFactor,
+            duration: Duration(milliseconds: 500),
+            padding: EdgeInsets.all(8.0),
+            margin: EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(subCardImage),
+                fit: BoxFit.cover,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 3,
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
+                ),
+              ],
+              borderRadius: BorderRadius.all(Radius.circular(4.0)),
             ),
-          ],
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-        ),
-        child: Center(
-          child: Text(
-            subCardText,
-            style: TextStyle(fontSize: 12.0),
           ),
-        ),
+          if (isClicked)
+            Positioned.fill(
+              child: Center(
+                child: Text(
+                  subCardText,
+                  style: TextStyle(
+                    color: Colors.black, // Change text color to black
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
   void _toggleSubCard(int index) {
     setState(() {
+      // 클릭된 서브 카드의 이미지 변경
+      subCardImages[index] = 'assets/images/6.png';  //다른 이미지로 바꾸기
+
+      // 클릭된 서브 카드 인덱스 업데이트
       clickedCardIndex = index;
+
+      // 클릭되지 않은 카드 비활성화
+      for (int i = 0; i < subCardClickable.length; i++) {
+        subCardClickable[i] = (i == index);
+      }
     });
   }
 }

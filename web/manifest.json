@@ -1,6 +1,6 @@
 {
-    "name": "handong_han_bakwi",
-    "short_name": "handong_han_bakwi",
+    "name": "voice",
+    "short_name": "voice",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

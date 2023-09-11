@@ -54,6 +54,7 @@ class DefaultFirebaseOptions {
     authDomain: 'hcie-yous-935a1.firebaseapp.com',
     storageBucket: 'hcie-yous-935a1.appspot.com',
     measurementId: 'G-GRRY9BF8B0',
+    databaseURL: 'https://capstone-uniq-default-rtdb.firebaseio.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -62,6 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '657429260211',
     projectId: 'hcie-yous-935a1',
     storageBucket: 'hcie-yous-935a1.appspot.com',
+    databaseURL: 'https://capstone-uniq-default-rtdb.firebaseio.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -72,5 +74,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'hcie-yous-935a1.appspot.com',
     iosClientId: '657429260211-kjm01nhvumabbfau3mc1kdl2f9vke0ui.apps.googleusercontent.com',
     iosBundleId: 'com.example.yous',
+    databaseURL: 'https://capstone-uniq-default-rtdb.firebaseio.com',
   );
 }

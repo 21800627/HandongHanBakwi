@@ -31,13 +31,13 @@ class Game extends ChangeNotifier{
   List<Player> _players = [];
   List<Player> get players => _players;
 
-  Board board = Board(roundStep: 39, roundNum:1, playerNum: 4);
+  Board board = Board();
 
   Game({this.hostCode='',this.playerNum=0,this.roundNum=0, this.currentPlayerNum=0,}){
     // _listenToGames();
     // _listenToPlayers();
     _players = List<Player>.generate(playerNum, (i) => Player(index: i+1, roundStep: roundStep, roundNum: roundNum));
-    board = Board(roundStep: 39, roundNum:1, playerNum: 4);
+    board = Board(playerNum: playerNum);
   }
 
   factory Game.fromRTDB(Map<String, dynamic> data){

@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -10,14 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart'
 import '../app_state.dart';
 import '../auth/authentication.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -80,18 +73,18 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ));
                         });
-                        tileList.add(ListTile(
-                          title: ElevatedButton(
-                              onPressed: () async {
-                                appState.createGame().then((value) {
-                                  print('query value: $value');
-                                  context.go('/waiting-room/$value');
-                                });
-                              },
-                              child: const Text('Host Game')
-                          ),
-                        ));
                       }
+                      tileList.add(ListTile(
+                        title: ElevatedButton(
+                            onPressed: () async {
+                              appState.createGame().then((value) {
+                                print('query value: $value');
+                                context.go('/waiting-room/$value');
+                              });
+                            },
+                            child: const Text('Host Game')
+                        ),
+                      ));
                       return Expanded(
                         child: ListView(
                           shrinkWrap: true,

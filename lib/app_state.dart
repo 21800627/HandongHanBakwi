@@ -39,6 +39,7 @@ class ApplicationState extends ChangeNotifier {
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
+    print('====createGame=====');
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
@@ -65,6 +66,7 @@ class ApplicationState extends ChangeNotifier {
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
+    print('====createPlayer=====');
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
@@ -103,7 +105,7 @@ class ApplicationState extends ChangeNotifier {
       _database.update(updates);
     });
   }
-  List<Player> updatePlayerInfo(String hostKey, int dice){
+  Future<void> updateDiceValue(String hostKey, int dice) async {
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final results = _database.child('games/$hostKey').get();
 
@@ -112,14 +114,19 @@ class ApplicationState extends ChangeNotifier {
     int totalStep = 0;
     List<Player> playersList =[];
 
-    print('====updatePlayerInfo=====');
+    print('====updateDiceValue=====');
     print('hostKey: $hostKey, diceValue: $dice');
 
-    results.then((snapshot){
+    results.then((snapshot) {
       final gameData = snapshot.value as Map<String, dynamic>;
+      var diceValue = gameData['diceValue'] as int;
       final players = gameData['players'];
+
+      var sum = diceValue + dice;
+
       bool isNext = false;
 
+      print('gameData: $gameData');
       players.forEach((key, value){
         String id = key.toString();
         final playerData = value as Map<String, dynamic>;
@@ -131,7 +138,57 @@ class ApplicationState extends ChangeNotifier {
           return false;
         }
         if(id == gameData['currentPlayerId']){
+          print('dice: $dice, step: ${playerData['step']}');
           totalStep = playerData['step'] + dice;
+          print('totalStep: $totalStep, dice: $dice, step: ${playerData['step']}');
+          playerData['step'] = totalStep;
+          isNext = true;
+          print('id: $id, data: $playerData');
+        }
+        players[key] = playerData;
+        playersList.add(Player({id: playerData}));
+      });
+
+      gameData['diceValue'] = sum;
+      updates['/games/$hostKey'] = gameData;
+      print(updates);
+
+      _database.update(updates);
+    });
+  }
+  void updatePlayerInfo(String hostKey){
+    final DatabaseReference _database = FirebaseDatabase.instance.ref();
+    final results = _database.child('games/$hostKey').get();
+
+    final Map<String, Map> updates = {};
+
+    int totalStep = 0;
+    List<Player> playersList =[];
+
+    print('====updatePlayerInfo=====');
+    print('hostKey: $hostKey');
+
+    results.then((snapshot){
+      final gameData = snapshot.value as Map<String, dynamic>;
+      final players = gameData['players'];
+      final dice = gameData['diceValue'];
+      bool isNext = false;
+
+      print('gameData: $gameData');
+      players.forEach((key, value){
+        String id = key.toString();
+        final playerData = value as Map<String, dynamic>;
+
+        if(isNext){
+          print('currentPlayerId: ${key.toString()} to ${gameData['currentPlayerId']}');
+          gameData['currentPlayerId'] = key.toString();
+          gameData['players'] = players;
+          return false;
+        }
+        if(id == gameData['currentPlayerId']){
+          print('dice: $dice, step: ${playerData['step']}');
+          totalStep = playerData['step'] + dice;
+          print('totalStep: $totalStep, dice: $dice, step: ${playerData['step']}');
           playerData['step'] = totalStep;
           isNext = true;
           print('id: $id, data: $playerData');
@@ -145,15 +202,14 @@ class ApplicationState extends ChangeNotifier {
       _database.update(updates);
     });
 
-    //notifyListeners();
-
-    return playersList;
+    notifyListeners();
   }
 
   Stream<List<GameRoom>> getGameStream(){
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final results = _database.child('games').onValue;
 
+    print('====getGameStream=====');
     final gameStream = results.map((event){
       final gameMap = event.snapshot.value as Map<String, dynamic>;
       final gameList = gameMap.entries.map((el){
@@ -172,8 +228,8 @@ class ApplicationState extends ChangeNotifier {
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final results = _database.child('games/$hostKey').onValue;
 
-    // print('====searchGameInfoStream=====');
-    // print('hostKey: $hostKey');
+    print('====searchGameInfoStream=====');
+    print('hostKey: $hostKey');
 
     final gameStream = results.map((event){
       final gameMap = event.snapshot.value as Map<String, dynamic>;
@@ -186,15 +242,20 @@ class ApplicationState extends ChangeNotifier {
   }
   Stream<List<Player>> searchPlayersInfo(String hostKey){
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
-    final results = _database.child('games/$hostKey/players').get();
+    final results = _database.child('games/$hostKey/players').onValue;
 
-    final playersStream = results.asStream().map((event){
-      final players = event.value as Map<String, dynamic>;
+    print('====searchPlayersInfo=====');
+    print('hostKey: $hostKey');
+    final playersStream = results.map((event){
+      final players = event.snapshot.value as Map<String, dynamic>;
       List<Player> playersList =[];
       players.forEach((key, value) {
         print('searchvalue: $value');
         playersList.add(Player({key: value}));
       });
+      for (var value1 in playersList) {
+        print('playerLIst name: ${value1.name}, step: ${value1.step}');
+      }
       return playersList;
     });
 
@@ -305,6 +366,7 @@ class Player{
     _id = data.keys.first;
     for(var element in data.values){
       _name = element['name'];
+      step = element['step'];
       timestamp = element['timestamp'];
     }
   }

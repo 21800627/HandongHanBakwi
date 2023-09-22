@@ -35,16 +35,19 @@ class ApplicationState extends ChangeNotifier {
     });
   }
 
-  Future<String> createGame() async{
+  Future<String> createGame(String code, int num) async{
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
     print('====createGame=====');
+    print('code: $code, number: $num');
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
 
     final gameData = {
+      'code': code,
+      'playerNum': num,
       'question': '',
       'diceValue': 0,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
@@ -55,6 +58,7 @@ class ApplicationState extends ChangeNotifier {
     updates['/games/$newHostKey'] = gameData;
     updates['/game-hosts/$_uid/$newHostKey'] = gameData;
 
+    //print(updates);
     _database.update(updates);
 
     notifyListeners();
@@ -266,6 +270,8 @@ class ApplicationState extends ChangeNotifier {
 
 class GameRoom{
   String _id = '';
+  String code = '';
+  int playerNum = 0;
   int timestamp = 0;
   List<Player> players=[];
   int diceValue = 0;
@@ -279,6 +285,8 @@ class GameRoom{
   GameRoom(String id, Map<String, dynamic> data){
     print("gameroom: $data");
     _id = id;
+    code = data['code'];
+    playerNum = data['playerNum'];
     timestamp = data['timestamp'];
     if(data.containsKey('players')){
       Player p = Player(data['players']);

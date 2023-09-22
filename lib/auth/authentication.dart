@@ -22,40 +22,46 @@ class AuthFunc extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          margin: const EdgeInsets.all(8),
-          width: 200,
-          child: ElevatedButton(
-              onPressed: () {
-                !loggedIn ? context.push('/sign-in') : signOut();
-              },
-              child: !loggedIn ? const Text('Log In') : const Text('Logout')),
+        Row(
+          children: [
+            Container(
+              margin: const EdgeInsets.all(8),
+              width: MediaQuery.of(context).size.width * 0.25,
+              child: OutlinedButton(
+                  onPressed: () {
+                    !loggedIn ? context.push('/sign-in') : signOut();
+                  },
+                  child: !loggedIn ? const Text('Log In') : const Text('Log out')),
+            ),
+            Visibility(
+                visible: loggedIn,
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  width: MediaQuery.of(context).size.width * 0.25,
+                  child: OutlinedButton(
+                      onPressed: () {
+                        context.push('/profile');
+                        if (FirebaseAuth.instance.currentUser != null) {
+                          print(FirebaseAuth.instance.currentUser?.uid);
+                        }
+                      },
+                      child: const Text('Profile')),
+                )
+            ),
+          ],
         ),
         Visibility(
-            visible: loggedIn,
+            visible: !loggedIn,
             child: Container(
               margin: const EdgeInsets.all(8),
-              width: 200,
-              child: ElevatedButton(
-                  onPressed: () {
-                    context.push('/profile');
-                    if (FirebaseAuth.instance.currentUser != null) {
-                      print(FirebaseAuth.instance.currentUser?.uid);
-                    }
-                  },
-                  child: const Text('Profile')),
-            )),
-        Visibility(
-            visible: loggedIn,
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              width: 200,
-              child: ElevatedButton(
+              width: MediaQuery.of(context).size.width * 0.25,
+              child: OutlinedButton(
                   onPressed: () {
                     null;
                   },
                   child: const Text('Tutorial')),
-            )),
+            )
+        ),
       ],
     );
   }

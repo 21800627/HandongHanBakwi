@@ -5,9 +5,7 @@ import 'package:provider/provider.dart';
 import '../app_state.dart';
 
 class HostGamePage extends StatefulWidget {
-  const HostGamePage({Key? key, required this.hostKey}) : super(key: key);
-
-  final String hostKey;
+  const HostGamePage({Key? key}) : super(key: key);
 
   @override
   _HostGamePageState createState() => _HostGamePageState();
@@ -15,8 +13,34 @@ class HostGamePage extends StatefulWidget {
 
 class _HostGamePageState extends State<HostGamePage> {
 
-  final List<String> entries = <String>['A', 'B', 'C'];
-  final List<int> colorCodes = <int>[600, 500, 100];
+  final codeController = TextEditingController();
+  final numberController = TextEditingController();
+
+  void _printLatestValue_code() {
+    final text = codeController.text;
+    print('first text field: $text (${text.characters.length})');
+  }
+  void _printLatestValue_num() {
+    final text = numberController.text;
+    print('Second text field: $text (${text.characters.length})');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Start listening to changes.
+    codeController.addListener(_printLatestValue_code);
+    numberController.addListener(_printLatestValue_num);
+  }
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is removed from the
+    // widget tree.
+    codeController.dispose();
+    numberController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,51 +53,58 @@ class _HostGamePageState extends State<HostGamePage> {
         ),
       ),
       body: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Consumer<ApplicationState>(
             builder: (context, appState, _) {
-              return StreamBuilder(
-                  stream: appState.searchGameInfoStream(widget.hostKey),
-                  builder: (context, snapshot) {
-                    final tileList = <ListTile>[];
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Host Code',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 30),
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: TextFormField(
+                      controller: codeController,
+                      autofocus: true,
+                    ),
+                  ),
+                  Text(
+                    'The max number of Players',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 30),
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: TextFormField(
+                      controller: numberController,
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.all(8),
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    child: OutlinedButton(
+                        onPressed: () {
+                          print('${codeController.text}');
+                          //appState.setCurrentPlayer(widget.hostKey);
+                          var code = codeController.text;
+                          var num = int.parse(numberController.text);
 
-                    if(snapshot.hasError){
-                      print('HostGameUI.dart 41: ${snapshot.error}');
-                    }
-                    if(snapshot.hasData){
-                      final players = snapshot.data?.players;
-                      for (var element in players!) {
-                        tileList.add(ListTile(
-                          title: Text('${element.name}'),
-                        ));
-                      }
-                    }
-                    tileList.add(ListTile(
-                      title: ElevatedButton(
-                          onPressed: () {
-                            //appState.setCurrentPlayer(widget.hostKey);
-                             appState.setCurrentPlayer(widget.hostKey).then((value) =>
-                               context.go('/start-game/${widget.hostKey}')
-                             );
-                          },
-                          child: const Text('Start Game')
-                      ),
-                    ));
-
-                    return Expanded(
-                      child: ListView(
-                        children:tileList,
-                      ),
-                    );
-                  }
+                          appState.createGame(code, num).then((hostKey) =>
+                            appState.createPlayer(hostKey).then((value) =>
+                                context.go('/waiting-room/$hostKey')
+                            )
+                          );
+                        },
+                        child: const Text('Confirm')
+                    ),
+                  ),
+                ],
               );
             }
-          ),
-          Column(
-            children: [
-              Text('${widget.hostKey}'),
-
-            ],
           ),
         ],
       ),

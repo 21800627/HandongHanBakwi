@@ -11,6 +11,7 @@ import '../widgets/Board.dart';
 import '../widgets/Dice.dart';
 import '../widgets/QCard.dart';
 
+
 class Board_2_Screen extends StatelessWidget{
   final GlobalKey<DiceState> diceKey = GlobalKey<DiceState>();
 

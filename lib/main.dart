@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart'; // new
 import 'package:handong_han_bakwi/src/StartGameUI.dart';
+import 'package:handong_han_bakwi/src/WaitingRoomUI.dart';
 
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';               // new
@@ -108,10 +109,16 @@ final _router = GoRouter(
           },
         ),
         GoRoute(
+          path: 'host-game',
+          builder: (context, state) {
+            return HostGamePage();
+          },
+        ),
+        GoRoute(
           path: 'waiting-room/:hostKey',
           builder: (context, state) {
             final String hostKey = state.pathParameters['hostKey'].toString();
-            return HostGamePage(hostKey: hostKey,);
+            return WaitingRoomPage(hostKey: hostKey,);
           },
         ),
         GoRoute(
@@ -158,13 +165,25 @@ class MyApp extends StatelessWidget {
       builder: (context, snapshot) {
         return MaterialApp.router(
             title: 'Handong Han Bakwi',
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-            ),
+            theme: _buildTheme(Brightness.light),
             routerConfig: _router,
         );
       }
     );
+  }
+  ThemeData _buildTheme(brightness) {
+    var baseTheme = ThemeData(brightness: brightness);
 
+    return baseTheme.copyWith(
+      textTheme: GoogleFonts.bungeeTextTheme(baseTheme.textTheme),
+      backgroundColor: Color(0xffFAFAFA),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          primary: Colors.white,
+          backgroundColor: const Color(0xff00A3CE),
+          side: const BorderSide(width: 2.0, color: Color(0xff383838)),
+        ),
+      ),
+    );
   }
 }

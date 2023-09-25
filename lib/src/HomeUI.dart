@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -10,14 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart'
 import '../app_state.dart';
 import '../auth/authentication.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -28,32 +21,16 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Consumer<ApplicationState>(
         builder: (context, appState, _){
           print('appState: ${appState.loggedIn}');
-          return Row(
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AuthFunc(
-                  loggedIn: appState.loggedIn,
-                  signOut: () {
-                    FirebaseAuth.instance.signOut();
-                  }
+              Visibility(
+                visible: appState.loggedIn,
+                child: Text(
+                  'Room List',
+                  style: Theme.of(context).textTheme.headline3,
+                ),
               ),
-              // Column(
-              //   children: [
-              //     Visibility(
-              //       visible: appState.loggedIn,
-              //       child: Container(
-              //         margin: const EdgeInsets.all(8),
-              //         width: 200,
-              //         child: ElevatedButton(
-              //             onPressed: () {
-              //               //appState.createGame();
-              //               //context.push('/HostGamePage');
-              //             },
-              //             child: const Text('Host Game')
-              //         ),
-              //       ),
-              //     ),
-              //   ],
-              // ),
               Visibility(
                 visible: appState.loggedIn,
                 child: StreamBuilder(
@@ -66,31 +43,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                       if(snapshot.hasData){
                         print('getGameStream: ${snapshot.connectionState}');
+                        int index = 0;
                         final games = snapshot.data;
                         games?.forEach((element) {
+                          index++;
                           tileList.add(ListTile(
                             title: TextButton(
-                              onPressed: () {
-                                String hostKey = element.id;
-                                appState.createPlayer(hostKey).then((value){
-                                  context.go('/waiting-room/$hostKey');
-                                });
-                              },
-                              child: Text('${element.timestamp}')
+                                onPressed: () {
+                                  String hostKey = element.id;
+                                  appState.createPlayer(hostKey).then((value){
+                                    context.go('/waiting-room/$hostKey');
+                                  });
+                                },
+                                child: Text('room #$index ${element.code}')
                             ),
                           ));
                         });
-                        tileList.add(ListTile(
-                          title: ElevatedButton(
-                              onPressed: () async {
-                                appState.createGame().then((value) {
-                                  print('query value: $value');
-                                  context.go('/waiting-room/$value');
-                                });
-                              },
-                              child: const Text('Host Game')
-                          ),
-                        ));
                       }
                       return Expanded(
                         child: ListView(
@@ -101,22 +69,34 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                 ),
               ),
-              // Visibility(
-              //   visible: appState.loggedIn,
-              //   child: Expanded(
-              //     child: ListView.separated(
-              //       shrinkWrap: true,
-              //       padding: const EdgeInsets.all(8),
-              //       itemCount: 10,
-              //       itemBuilder: (BuildContext context, int index) {
-              //         return Text('$index');
-              //       },
-              //       separatorBuilder: (BuildContext ctx, int idx) {
-              //         return Divider();
-              //       },
-              //     ),
-              //   ),
-              // ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AuthFunc(
+                      loggedIn: appState.loggedIn,
+                      signOut: () {
+                        FirebaseAuth.instance.signOut();
+                      }
+                  ),
+                  Visibility(
+                    visible: appState.loggedIn,
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      width: MediaQuery.of(context).size.width * 0.25,
+                      child: OutlinedButton(
+                          onPressed: () async {
+                            // appState.createGame().then((value) {
+                            //   print('query value: $value');
+                            //   context.go('/waiting-room/$value');
+                            // });
+                            context.go('/host-game');
+                          },
+                          child: const Text('Host Game')
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           );
         },

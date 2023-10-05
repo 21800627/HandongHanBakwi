@@ -14,23 +14,24 @@ class WaitingRoomPage extends StatefulWidget {
 }
 
 class _WaitingRoomPageState extends State<WaitingRoomPage> {
-
-  final List<String> entries = <String>['A', 'B', 'C'];
-  final List<int> colorCodes = <int>[600, 500, 100];
-
+  // 뭐가 문제 ?? isHost , isPlayerReady 안됨........
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Waiting Room'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Consumer<ApplicationState>(
-          builder: (context, appState, _) {
-          return Column(
+    return Consumer<ApplicationState>(
+        builder: (context, appState, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Waiting Room'),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                appState.removePlayer(widget.hostKey).then((value) =>
+                    Navigator.pop(context)
+                );
+              },
+            ),
+          ),
+          body: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               StreamBuilder(
@@ -42,13 +43,48 @@ class _WaitingRoomPageState extends State<WaitingRoomPage> {
                       print('HostGameUI.dart 41: ${snapshot.error}');
                     }
                     if(snapshot.hasData){
-                      final players = snapshot.data?.players;
-                      for (var element in players!) {
-                        tileList.add(ListTile(
-                          title: Container(
-                              child: Text('${element.name}',textAlign: TextAlign.center,)
-                          ),
-                        ));
+                      print('player length: ${snapshot.data?.players.length}, max playernum: ${snapshot.data?.playerNum}');
+                      final players = snapshot.data?.players ?? [];
+                      final int playerNum = snapshot.data?.playerNum ?? 0;
+                      for(var p in players){
+                        print('player name: ${p.name}');
+                      }
+
+                      for(int i=0; i<playerNum; i++){
+                        if(i < players.length) {
+                          tileList.add(
+                              ListTile(
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                        child: Text('${players[i].name}',textAlign: TextAlign.center,)
+                                    ),
+                                    players[i].ready ?
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      color: Colors.green,
+                                      size: 15.0,
+                                    ) :
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      color: Colors.red,
+                                      size: 15.0,
+                                    ),
+                                  ],
+                                ),
+                              )
+                          );
+                        }else{
+                          tileList.add(
+                              ListTile(
+                                selected: true,
+                                title: Container(
+                                    child: Text('waiting...',textAlign: TextAlign.center,)
+                                ),
+                              )
+                          );
+                        }
                       }
                     }
                     return Expanded(
@@ -58,22 +94,38 @@ class _WaitingRoomPageState extends State<WaitingRoomPage> {
                     );
                   }
               ),
-              Container(
-                margin: const EdgeInsets.all(8),
-                width: MediaQuery.of(context).size.width * 0.25,
-                child: OutlinedButton(
+              Visibility(
+                visible: appState.isHost,
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  width: MediaQuery.of(context).size.width * 0.25,
+                  child: OutlinedButton(
+                      onPressed: () {
+                        appState.setCurrentPlayer(widget.hostKey).then((value) =>
+                            context.go('/start-game/${widget.hostKey}')
+                        );
+                      },
+                      child: const Text('Start')
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: !appState.isHost,
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  width: MediaQuery.of(context).size.width * 0.25,
+                  child: OutlinedButton(
                     onPressed: () {
-                      appState.setCurrentPlayer(widget.hostKey).then((value) =>
-                        context.go('/start-game/${widget.hostKey}')
-                      );
+                      appState.updatePlayerReady(widget.hostKey);
                     },
-                    child: const Text('Start')
+                    child: Text(appState.isReady ? 'Not to be played' : 'Ready'),
+                  ),
                 ),
               ),
             ],
-          );
-        }
-      ),
+          )
+        );
+      }
     );
   }
 }

@@ -15,7 +15,11 @@ class ApplicationState extends ChangeNotifier {
   }
 
   bool _loggedIn = false;
+  bool _isReady = false;
+  bool _isHost = false;
   bool get loggedIn => _loggedIn;
+  bool get isReady => _isReady;
+  bool get isHost => _isHost;
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -44,6 +48,8 @@ class ApplicationState extends ChangeNotifier {
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
+
+    _isHost = true;
 
     final gameData = {
       'code': code,
@@ -92,6 +98,21 @@ class ApplicationState extends ChangeNotifier {
     return _uid;
   }
 
+  Future<void> removePlayer(String hostKey) async{
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
+    final DatabaseReference _database = FirebaseDatabase.instance.ref();
+
+    if(_isHost){
+      _database.child('game-hosts/$_uid').remove();
+      _database.child('games/$hostKey').remove();
+    }
+    else{
+      _database.child('games/$hostKey/players/$_uid').remove();
+    }
+
+    notifyListeners();
+  }
+
   Future<void> setCurrentPlayer(String hostKey) async {
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final results = _database.child('games/$hostKey').get();
@@ -116,7 +137,6 @@ class ApplicationState extends ChangeNotifier {
     final Map<String, Map> updates = {};
 
     int totalStep = 0;
-    List<Player> playersList =[];
 
     print('====updateDiceValue=====');
     print('hostKey: $hostKey, diceValue: $dice');
@@ -124,7 +144,7 @@ class ApplicationState extends ChangeNotifier {
     results.then((snapshot) {
       final gameData = snapshot.value as Map<String, dynamic>;
       var diceValue = gameData['diceValue'] as int;
-      final players = gameData['players'];
+      final players = gameData['players'] as Map<String, dynamic>;
 
       var sum = diceValue + dice;
 
@@ -137,9 +157,13 @@ class ApplicationState extends ChangeNotifier {
 
         if(isNext){
           print('currentPlayerId: ${key.toString()} to ${gameData['currentPlayerId']}');
-          gameData['currentPlayerId'] = key.toString();
+          if(players.keys.last == gameData['currentPlayerId']){
+            gameData['currentPlayerId'] = players.keys.first;
+          }else{
+            gameData['currentPlayerId'] = key.toString();
+          }
           gameData['players'] = players;
-          return false;
+          return;
         }
         if(id == gameData['currentPlayerId']){
           print('dice: $dice, step: ${playerData['step']}');
@@ -150,7 +174,6 @@ class ApplicationState extends ChangeNotifier {
           print('id: $id, data: $playerData');
         }
         players[key] = playerData;
-        playersList.add(Player({id: playerData}));
       });
 
       gameData['diceValue'] = sum;
@@ -208,6 +231,29 @@ class ApplicationState extends ChangeNotifier {
 
     notifyListeners();
   }
+  void updatePlayerReady(String hostKey){
+    final DatabaseReference _database = FirebaseDatabase.instance.ref();
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
+    final results = _database.child('games/$hostKey/players/$_uid').get();
+
+    final Map<String, Map> updates = {};
+
+    print('====updatePlayerReady=====');
+
+    results.then((snapshot){
+      final playerData = snapshot.value as Map<String, dynamic>;
+      print(playerData);
+      //playerData['ready'] = !ready;
+      _isReady = !_isReady;
+      playerData['ready'] = _isReady;
+
+      updates['games/$hostKey/players/$_uid'] = playerData;
+
+      _database.update(updates);
+    });
+
+    notifyListeners();
+  }
 
   Stream<List<GameRoom>> getGameStream(){
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
@@ -237,7 +283,7 @@ class ApplicationState extends ChangeNotifier {
 
     final gameStream = results.map((event){
       final gameMap = event.snapshot.value as Map<String, dynamic>;
-      // print(gameMap);
+      print('gameMap: $gameMap');
       GameRoom gameInfo = GameRoom(hostKey, gameMap);
       return gameInfo;
     });
@@ -289,9 +335,11 @@ class GameRoom{
     playerNum = data['playerNum'];
     timestamp = data['timestamp'];
     if(data.containsKey('players')){
-      Player p = Player(data['players']);
-      players.add(p);
-      //tileIndex[0].add(p);
+      var ps = data['players'] as Map<String, dynamic>;
+      for(var p in ps.entries){
+        Player player = Player({p.key: p.value});
+        players.add(player);
+      }
     }
   }
 
@@ -361,6 +409,7 @@ class Player{
   String _id='';
   String _name='';
   bool isOver = false;
+  bool ready = false;
   int step = 0;
   int timestamp = 0;
 
@@ -376,6 +425,7 @@ class Player{
       _name = element['name'];
       step = element['step'];
       timestamp = element['timestamp'];
+      ready = element['ready'] ?? false;
     }
   }
 }

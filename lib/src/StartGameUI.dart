@@ -16,10 +16,12 @@ class StartGamePage extends StatelessWidget {
 
   StartGamePage({Key? key, required this.hostKey}) : super(key: key);
 
+  List<String> imagePaths = List.generate(40, (index) => 'assets/backgrounds/${index + 1}.png');
   List<Player> players=[];
   List<List<Player>> tileIndex = List.generate(40, (_)=>[]);
   int currentPlayerIndex = 0;
   String currentPlayerId = '';
+
 
   void _exitOnPressed(context, model){
     hideQCardOverlay();
@@ -283,8 +285,55 @@ class StartGamePage extends StatelessWidget {
               )
           )
         ];
+
         print('LayoutBuilder ${data?.first.step}: $viewIndex');
 
+        /// 추가한 코드
+        return Stack(
+          children: [
+            // Display start image (투명도 80)
+            if (viewIndex == 0)
+              Center(
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Color(0xffC4DFDF).withOpacity(0.2), // 80% opacity and color 0xffC4DFDF
+                    BlendMode.srcATop,
+                  ),
+                  child: Image.asset(imagePaths[0]),
+                ),
+              ),
+
+            // Display end image with 60% opacity and color 0xffC4DFDF
+            if (viewIndex == _boardTileCount - 1)
+              Center(
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Color(0xffC4DFDF).withOpacity(0.2), // 80% opacity and color 0xffC4DFDF
+                    BlendMode.srcATop,
+                  ),
+                  child: Image.asset(imagePaths[_boardTileCount - 1]),
+                ),
+              ),
+
+            // Display other images with 60% opacity and color 0xffC4DFDF
+            if (viewIndex != 0 && viewIndex != _boardTileCount - 1)
+              Center(
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Color(0xffC4DFDF).withOpacity(0.2), // 60% opacity and color 0xffC4DFDF
+                    BlendMode.srcATop,
+                  ),
+                  child: Image.asset(imagePaths[viewIndex]),
+                ),
+              ),
+            //Stack player widget
+            if(data.first.step == viewIndex)
+              playerWidget[0],
+          ],
+        );
+
+        /*
+        ///기존 코드
         return Stack(
             children: [
               if(viewIndex==0)
@@ -301,6 +350,8 @@ class StartGamePage extends StatelessWidget {
                 playerWidget[0],
             ]
         );
+         */
+
       }
   );
 }

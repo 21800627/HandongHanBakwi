@@ -82,6 +82,7 @@ flutter:
    - assets/images/player2.png
    - assets/images/player3.png
    - assets/images/player4.png
+   - assets/backgrounds/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

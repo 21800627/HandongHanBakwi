@@ -346,8 +346,10 @@ class StartGamePage extends StatelessWidget {
                 ),
 
               //Stack player widget
-              if(data.first.step == viewIndex)
-                playerWidget[0],
+              for(int i=0; i<data.length; i++)...[
+                if(data[i].step == viewIndex)
+                  playerWidget[i],
+              ]
             ]
         );
          */

@@ -17,9 +17,13 @@ class ApplicationState extends ChangeNotifier {
   bool _loggedIn = false;
   bool _isReady = false;
   bool _isHost = false;
+  bool _isGameOver = false;
+  bool _isTurn = false;
   bool get loggedIn => _loggedIn;
   bool get isReady => _isReady;
   bool get isHost => _isHost;
+  bool get isGameOver => _isGameOver;
+  bool get isTurn => _isTurn;
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -98,17 +102,21 @@ class ApplicationState extends ChangeNotifier {
     return _uid;
   }
 
+  Future<void> deleteGameRoom(String hostKey) async{
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
+    final DatabaseReference _database = FirebaseDatabase.instance.ref();
+
+    _database.child('game-hosts/$_uid/$hostKey').remove();
+    _database.child('games/$hostKey').remove();
+
+    notifyListeners();
+  }
+
   Future<void> removePlayer(String hostKey) async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
 
-    if(_isHost){
-      _database.child('game-hosts/$_uid').remove();
-      _database.child('games/$hostKey').remove();
-    }
-    else{
-      _database.child('games/$hostKey/players/$_uid').remove();
-    }
+    _database.child('games/$hostKey/players/$_uid').remove();
 
     notifyListeners();
   }
@@ -133,6 +141,7 @@ class ApplicationState extends ChangeNotifier {
   Future<void> updateDiceValue(String hostKey, int dice) async {
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final results = _database.child('games/$hostKey').get();
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
     final Map<String, Map> updates = {};
 
@@ -148,33 +157,30 @@ class ApplicationState extends ChangeNotifier {
 
       var sum = diceValue + dice;
 
-      bool isNext = false;
+      if(gameData['isOver'] == true){
+        _isGameOver = true;
+      }
+      if(_uid == gameData['currentPlayerId']){
+        print('dice: $dice, step: ${players[_uid]['step']}');
+        totalStep = players[_uid]['step'] + dice;
+        print('totalStep: $totalStep, dice: $dice, step: ${players[_uid]['step']}');
+        players[_uid]['step'] = totalStep;
 
-      print('gameData: $gameData');
-      players.forEach((key, value){
-        String id = key.toString();
-        final playerData = value as Map<String, dynamic>;
+        gameData['players'] = players;
 
-        if(isNext){
-          print('currentPlayerId: ${key.toString()} to ${gameData['currentPlayerId']}');
-          if(players.keys.last == gameData['currentPlayerId']){
-            gameData['currentPlayerId'] = players.keys.first;
-          }else{
-            gameData['currentPlayerId'] = key.toString();
-          }
-          gameData['players'] = players;
-          return;
+        if(_uid == players.keys.last){
+          gameData['currentPlayerId'] = players.keys.first;
+        }else{
+          List<String> playerList = players.keys.toList();
+          int index = playerList.indexOf(_uid) + 1;
+          gameData['currentPlayerId'] = playerList.elementAt(index);
         }
-        if(id == gameData['currentPlayerId']){
-          print('dice: $dice, step: ${playerData['step']}');
-          totalStep = playerData['step'] + dice;
-          print('totalStep: $totalStep, dice: $dice, step: ${playerData['step']}');
-          playerData['step'] = totalStep;
-          isNext = true;
-          print('id: $id, data: $playerData');
+
+        if(totalStep >= 40){
+          gameData['isOver'] = true;
+          _isGameOver = true;
         }
-        players[key] = playerData;
-      });
+      }
 
       gameData['diceValue'] = sum;
       updates['/games/$hostKey'] = gameData;
@@ -265,7 +271,7 @@ class ApplicationState extends ChangeNotifier {
       final gameList = gameMap.entries.map((el){
         String id = el.key.toString();
         final data = el.value as Map<String, dynamic>;
-        return GameRoom(id, data);
+        return GameRoom(id: id, data: data);
       }).toList();
 
       return gameList;
@@ -277,6 +283,7 @@ class ApplicationState extends ChangeNotifier {
   Stream<GameRoom> searchGameInfoStream(String hostKey){
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final results = _database.child('games/$hostKey').onValue;
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
     print('====searchGameInfoStream=====');
     print('hostKey: $hostKey');
@@ -284,7 +291,20 @@ class ApplicationState extends ChangeNotifier {
     final gameStream = results.map((event){
       final gameMap = event.snapshot.value as Map<String, dynamic>;
       print('gameMap: $gameMap');
-      GameRoom gameInfo = GameRoom(hostKey, gameMap);
+      GameRoom gameInfo = GameRoom(id: hostKey, data: gameMap);
+
+      if(gameInfo.currentPlayerId == _uid){
+        _isTurn = true;
+      }else{
+        _isTurn = false;
+      }
+
+      if(gameInfo.players.any((element) => element.step >= 40)){
+        _isGameOver = true;
+      }else{
+        _isGameOver = false;
+      }
+
       return gameInfo;
     });
 
@@ -323,28 +343,39 @@ class GameRoom{
   int diceValue = 0;
   String question = '';
   int totalStep = 40;
-  int currentPlayerIndex = 0;
+  String currentPlayerId = '';
+  bool isOver = false;
 
   List<List<Player>> tileIndex = List.filled(0,[]);
   get id => _id;
 
-  GameRoom(String id, Map<String, dynamic> data){
+  GameRoom({String id='', Map<String, dynamic>? data, }){
+    data ??= {}; // Provide a default empty map if data is null
     print("gameroom: $data");
     _id = id;
     code = data['code'];
     playerNum = data['playerNum'];
     timestamp = data['timestamp'];
+    currentPlayerId = data['currentPlayerId'] ?? '';
+    isOver = data['isOver'] ?? false;
     if(data.containsKey('players')){
       var ps = data['players'] as Map<String, dynamic>;
       for(var p in ps.entries){
         Player player = Player({p.key: p.value});
         players.add(player);
       }
+      players.sort((a,b)=>a.timestamp.compareTo(b.timestamp));
+      players.first.isHost=true;
+      players.shuffle();
+      int index = players.indexOf(players.firstWhere((element) => element.isHost==true));
+      Player temp = players.first;
+      players.first = players[index];
+      players[index] = temp;
     }
   }
 
   bool isGameOver(){
-    return players.isNotEmpty && players.indexWhere((p) => p.isOver) != -1;
+    return players.isNotEmpty && players.indexWhere((p) => p.step>40) != -1;
   }
 
   void setDiceValue(int value){
@@ -358,58 +389,13 @@ class GameRoom{
   String getQuestion(){
     return question;
   }
-
-  void addPlayerSteps(int diceValue) {
-    // find current player index
-    int index = players.indexWhere((p) => !p.isOver, currentPlayerIndex);
-    // if player is not over calculate player total step
-    if(index > -1){
-      currentPlayerIndex = index;
-      // set total step and round Num
-      players[currentPlayerIndex].step += diceValue;
-      // show on board tile index
-      for (var list in tileIndex) {
-        if(list.isNotEmpty){
-          list.removeWhere((p) => p == currentPlayerIndex);
-        }
-      }
-      if (players[currentPlayerIndex].step >= totalStep) {
-        players[currentPlayerIndex].isOver = true;
-      }else{
-        tileIndex[players[currentPlayerIndex].step].add(players[currentPlayerIndex]);
-      }
-    }
-  }
-
-  void setCurrentPlayerIndex(){
-    if(currentPlayerIndex < players.length-1){
-      int index = players.indexWhere((p) => !p.isOver, currentPlayerIndex);
-      if(index<0){
-        int index = players.indexWhere((p) => !p.isOver);
-        currentPlayerIndex=index;
-      }
-      else if (currentPlayerIndex == index){
-        int index = players.indexWhere((p) => !p.isOver, currentPlayerIndex+1);
-        currentPlayerIndex = index;
-      }else{
-        currentPlayerIndex=index;
-      }
-    }else{
-      int index = players.indexWhere((p) => !p.isOver);
-      currentPlayerIndex = index;
-    }
-  }
-
-  bool isCurrentPlayerIndex(int index){
-    return index == currentPlayerIndex;
-  }
 }
 
 class Player{
   String _id='';
   String _name='';
-  bool isOver = false;
   bool ready = false;
+  bool isHost = false;
   int step = 0;
   int timestamp = 0;
 

@@ -17,16 +17,11 @@ class StartGamePage extends StatelessWidget {
   StartGamePage({Key? key, required this.hostKey}) : super(key: key);
 
   List<String> imagePaths = List.generate(40, (index) => 'assets/backgrounds/${index + 1}.png');
-  List<Player> players=[];
-  List<List<Player>> tileIndex = List.generate(40, (_)=>[]);
-  int currentPlayerIndex = 0;
-  String currentPlayerId = '';
 
-
-  void _exitOnPressed(context, model){
+  void _exitOnPressed(context, appState){
     hideQCardOverlay();
     hideGameOverOverlay();
-    if(model.isGameOver()){
+    if(appState.isGameOver){
       Navigator.pushNamed(context, '/');
     }else{
       showDialog(
@@ -65,76 +60,73 @@ class StartGamePage extends StatelessWidget {
   }
   // when roll dice animation ends, add player score
   void _diceOnPressed(context, appState) async {
-    await diceKey.currentState?.rollDice().then((value) {
-      //수정!!
-      // 1. set dice value and question
-      // 2. update player info
-      // 3. get player info
-      //_setCurrentPlayerIndex();
+    if(!appState.isGameOver && appState.isTurn){
+      await diceKey.currentState?.rollDice().then((value) {
 
-      print('currentPlayerId: $currentPlayerId');
-      appState.updateDiceValue(hostKey, value);
+        appState.updateDiceValue(hostKey, value);
+        //_addPlayerSteps();
+        //showQCardOverlay(context, appState);
 
-      _addPlayerSteps();
-
-      // appState.setDiceValue(value);
-      // appState.setQuestion(Question().getQuestion());
-      // appState.setPlayerStep(currentPlayerIndex, step);
-
-      //showQCardOverlay(context, appState);
-    });
-  }
-
-  void _addPlayerSteps() {
-    tileIndex = List.generate(40, (_) => []);
-    for (var element in players) {
-      if(!tileIndex[element.step].contains(element)){
-        print(element.step);
-
-        tileIndex[element.step].add(element);
-      }
+      });
     }
-    print(tileIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ApplicationState>(
         builder: (context, appState, _){
-        return Scaffold(
-          appBar: AppBar(
-            // title: Text('Board'),
-            elevation: 0.00,
-            automaticallyImplyLeading: false, // hide back button
-            backgroundColor: Colors.transparent,
-            toolbarHeight: MediaQuery.of(context).size.height * 0.1,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 15.0),
-                child: ElevatedButton(
-                  onPressed: ()=>_exitOnPressed(context, appState),
-                  child: const Text('Exit'),
-                ),
-              ),
-            ],
-          ),
-          body: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              StreamBuilder(
-                stream: appState.searchPlayersInfo(hostKey),
-                builder: (context, snapshot) {
-                  List<Player> data = snapshot.data as List<Player>;
+        return StreamBuilder(
+            stream: appState.searchGameInfoStream(hostKey),
+            builder: (context, snapshot) {
+              if(snapshot.hasError){
+                print('StartGameUI.dart 113: ${snapshot.error}');
+              }
+              if(!snapshot.hasData) {
+                print('StartGameUI.dart 116: no data');
+              }
 
-                  if(snapshot.hasError){
-                    print('StartGameUI.dart 173: ${snapshot.error}');
-                  }
-                  if(snapshot.hasData){
-                    for(var element in data){
-                      print('name: ${element.name}, step: ${element.step}');
-                    }
-                  }
-                  return Container(
+              final gameData = snapshot.data ?? GameRoom();
+              final players = gameData.players;
+              final tileList = <ListTile>[];
+
+              if(gameData.isOver){
+                ShowGameOverOverlay(context);
+              }
+
+              for (int i=0; i<players.length; i++) {
+                tileList.add(ListTile(
+                  dense:true,
+                  leading: Image.asset(
+                    'assets/images/player${i+1}.png',
+                  ),
+                  title: Text(players[i].name),
+                  //subtitle: Text('show current steps'),
+                  subtitle: Text('${players[i].step} steps'),
+                ));
+              }
+
+              return Scaffold(
+                appBar: AppBar(
+                // title: Text('Board'),
+                elevation: 0.00,
+                automaticallyImplyLeading: false, // hide back button
+                backgroundColor: Colors.transparent,
+                toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 15.0),
+                    child: ElevatedButton(
+                      onPressed: ()=>_exitOnPressed(context, appState),
+                      child: const Text('Exit'),
+                    ),
+                  ),
+                ],
+              ),
+                body: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // board tile
+                  Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: Center(
                       child: Builder(
@@ -181,64 +173,37 @@ class StartGamePage extends StatelessWidget {
                                   margin: const EdgeInsets.all(3),
                                   color: Color(colorValue),
                                   elevation: 2,
-                                  child: _buildTile(data, viewIndex),
+                                  child: _buildTile(players, viewIndex),
                                 );
                               },
                             );
                           }
                       ),
                     ),
-                  );
-                }
-              ),
-              GestureDetector(
-                  onTap: () => _diceOnPressed(context, appState),
-                  child: Dice(key: diceKey)
-              ),
-              StreamBuilder(
-                  stream: appState.searchPlayersInfo(hostKey),
-                  builder: (context, snapshot) {
-                    final tileList = <ListTile>[];
-                    List<Player> data = snapshot.data as List<Player>;
-
-                    if(snapshot.hasError){
-                      print('StartGameUI.dart 173: ${snapshot.error}');
-                    }
-                    if(snapshot.hasData){
-                      for(var element in data){
-                        print('name: ${element.name}, step: ${element.step}');
-                      }
-                      int pindex = 0;
-                      data.forEach((element) {
-                        tileList.add(ListTile(
-                          dense:true,
-                          leading: Image.asset(
-                            'assets/images/player${pindex+1}.png',
-                          ),
-                          title: Text(element.name),
-                          //subtitle: Text('show current steps'),
-                          subtitle: Text('${element.step} steps'),
-                        ));
-                        pindex++;
-                      });
-                    }
-                    return Container(
+                  ),
+                  // dice
+                  GestureDetector(
+                      onTap: () => _diceOnPressed(context, appState),
+                      child: Dice(key: diceKey)
+                  ),
+                  // player list
+                  Container(
                     width: MediaQuery.of(context).size.width * 0.2,
                     child: Center(
                       child:ListView(
                         children:tileList,
                       ),
                     ),
-                  );
-                }
-              )
-            ],
-          ),
+                  ),
+                ],
+              ),
+            );
+          }
         );
       }
     );
   }
-  _buildTile(data, viewIndex) => LayoutBuilder(
+  _buildTile(players, viewIndex) => LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         double parentWidth = constraints.maxWidth;
         double parentHeight = constraints.maxHeight;
@@ -286,9 +251,6 @@ class StartGamePage extends StatelessWidget {
           )
         ];
 
-        print('LayoutBuilder ${data?.first.step}: $viewIndex');
-
-        /// 추가한 코드
         return Stack(
           children: [
             // Display start image (투명도 80)
@@ -327,32 +289,12 @@ class StartGamePage extends StatelessWidget {
                 ),
               ),
             //Stack player widget
-            if(data.first.step == viewIndex)
-              playerWidget[0],
+            for(int i=0; i<players.length; i++)...[
+              if(players[i].step == viewIndex)
+                playerWidget[i],
+            ]
           ],
         );
-
-        /*
-        ///기존 코드
-        return Stack(
-            children: [
-              if(viewIndex==0)
-                const Center(child: Text('Start', style: TextStyle(fontSize: 15, color: Color(0xffF8F6F4)))),
-              if(viewIndex==_boardTileCount-1)
-                const Center(child: Text('End', style: TextStyle(fontSize: 15, color: Color(0xffF8F6F4)))),
-              if(viewIndex!=0 && viewIndex!=_boardTileCount-1)
-                Center(
-                  child: Text('$viewIndex', style: const TextStyle(fontSize: 15, color: Color(0xffF8F6F4))),
-                ),
-
-              //Stack player widget
-              for(int i=0; i<data.length; i++)...[
-                if(data[i].step == viewIndex)
-                  playerWidget[i],
-              ]
-            ]
-        );
-         */
 
       }
   );

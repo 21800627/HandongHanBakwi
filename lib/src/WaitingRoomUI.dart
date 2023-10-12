@@ -14,7 +14,6 @@ class WaitingRoomPage extends StatefulWidget {
 }
 
 class _WaitingRoomPageState extends State<WaitingRoomPage> {
-  // 뭐가 문제 ?? isHost , isPlayerReady 안됨........
   @override
   Widget build(BuildContext context) {
     return Consumer<ApplicationState>(
@@ -25,9 +24,15 @@ class _WaitingRoomPageState extends State<WaitingRoomPage> {
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
-                appState.removePlayer(widget.hostKey).then((value) =>
+                if(appState.isHost){
+                  appState.deleteGameRoom(widget.hostKey).then((value) =>
                     Navigator.pop(context)
-                );
+                  );
+                }else{
+                  appState.removePlayer(widget.hostKey).then((value) =>
+                      Navigator.pop(context)
+                  );
+                }
               },
             ),
           ),
@@ -46,13 +51,17 @@ class _WaitingRoomPageState extends State<WaitingRoomPage> {
                       print('player length: ${snapshot.data?.players.length}, max playernum: ${snapshot.data?.playerNum}');
                       final players = snapshot.data?.players ?? [];
                       final int playerNum = snapshot.data?.playerNum ?? 0;
+                      if(snapshot.data?.currentPlayerId != ''){
+                        context.go('/start-game/${widget.hostKey}');
+                      }
                       for(var p in players){
                         print('player name: ${p.name}');
                       }
 
                       for(int i=0; i<playerNum; i++){
                         if(i < players.length) {
-                          tileList.add(
+                          if(players[i].isHost){
+                            tileList.add(
                               ListTile(
                                 title: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -60,21 +69,49 @@ class _WaitingRoomPageState extends State<WaitingRoomPage> {
                                     Container(
                                         child: Text('${players[i].name}',textAlign: TextAlign.center,)
                                     ),
-                                    players[i].ready ?
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      color: Colors.green,
-                                      size: 15.0,
-                                    ) :
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      color: Colors.red,
-                                      size: 15.0,
+                                    Container(
+                                      padding: EdgeInsets.only(left: 10.0),
+                                      child: Icon(
+                                        Icons.flag_circle_rounded,
+                                        color: Colors.green,
+                                        size: 15.0,
+                                      ),
                                     ),
                                   ],
                                 ),
                               )
-                          );
+                            );
+                          }else{
+                            tileList.add(
+                                ListTile(
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                          child: Text('${players[i].name}',textAlign: TextAlign.center,)
+                                      ),
+                                      players[i].ready ?
+                                      Container(
+                                        padding: EdgeInsets.only(left: 10.0),
+                                        child: Icon(
+                                          Icons.check_circle_rounded,
+                                          color: Colors.green,
+                                          size: 15.0,
+                                        ),
+                                      ) :
+                                      Container(
+                                        padding: EdgeInsets.only(left: 10.0),
+                                        child: Icon(
+                                          Icons.check_circle_rounded,
+                                          color: Colors.red,
+                                          size: 15.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                            );
+                          }
                         }else{
                           tileList.add(
                               ListTile(

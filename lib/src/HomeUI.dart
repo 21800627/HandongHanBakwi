@@ -25,6 +25,17 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Visibility(
+                visible: !appState.loggedIn,
+                child: Container(
+                  //Todo: 하진
+                  child:Image(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    height: MediaQuery.of(context).size.height * 0.5,
+                      image: AssetImage('assets/images/HBB_LOGO.png')
+                  ),
+                ),
+              ),
+              Visibility(
                 visible: appState.loggedIn,
                 child: Text(
                   'Room List',
@@ -60,11 +71,16 @@ class HomeScreen extends StatelessWidget {
                           ));
                         });
                       }
-                      return Expanded(
-                        child: ListView(
-                          shrinkWrap: true,
-                          children:tileList,
+                      return Container(
+                        //Todo: 하진
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: Expanded(
+                          child: ListView(
+                            shrinkWrap: true,
+                            children:tileList,
+                          ),
                         ),
+
                       );
                     }
                 ),

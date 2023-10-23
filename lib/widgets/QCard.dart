@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 
+
 class QCard extends StatelessWidget {
   String message;
   QCard({super.key, required this.message});

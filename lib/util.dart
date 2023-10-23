@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:handong_han_bakwi/widgets/QCard.dart';
 
+import 'models/QUESTION.dart';
+
 void showWarningMessage(context, String title, String message){
   showDialog(
     context: context,
@@ -28,6 +30,7 @@ OverlayEntry? _qcard_overlayEntry;
 OverlayEntry? _exit_overlayEntry;
 
 void showQCardOverlay(BuildContext context, model) {
+  final question = Question();
   assert(_qcard_overlayEntry == null);
   _qcard_overlayEntry = OverlayEntry(
     builder: (BuildContext context) {
@@ -43,7 +46,7 @@ void showQCardOverlay(BuildContext context, model) {
               Icons.close,
             ),
           ),
-          QCard(message: model.getQuestion(),),
+          QCard(message: question.getQuestion(),),
         ],
       );
     },
@@ -51,6 +54,7 @@ void showQCardOverlay(BuildContext context, model) {
   // Add the OverlayEntry to the Overlay.
   Overlay.of(context)?.insert(_qcard_overlayEntry!);
 }
+// overlay를 리턴해서 페이지내에석  삭제하는 걸로 바꾸기!!
 void ShowGameOverOverlay(BuildContext context) {
   assert(_exit_overlayEntry == null);
   _exit_overlayEntry = OverlayEntry(

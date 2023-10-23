@@ -80,7 +80,7 @@ class Board_2_Screen extends StatelessWidget{
         showQCardOverlay(context, model);
       });
     } else{
-      ShowGameOverOverlay(context);
+      //ShowGameOverOverlay(context);
     }
   }
   // Future<int> _rollDice(context,model) async{

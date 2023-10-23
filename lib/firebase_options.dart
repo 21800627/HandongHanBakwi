@@ -47,33 +47,32 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAN_Yd5qpNv4WQAgNK6QXVOOc_FZl_hbqs',
-    appId: '1:657429260211:web:81288dd2358fa47aba0dc6',
-    messagingSenderId: '657429260211',
-    projectId: 'hcie-yous-935a1',
-    authDomain: 'hcie-yous-935a1.firebaseapp.com',
-    storageBucket: 'hcie-yous-935a1.appspot.com',
-    measurementId: 'G-GRRY9BF8B0',
+    apiKey: 'AIzaSyD7y_gO5HcCk1Pl5yrW-WUW8iDTPiX6KGY',
+    appId: '1:649232623400:web:9d81a82bf46fa1e49d121d',
+    messagingSenderId: '649232623400',
+    projectId: 'capstone-uniq',
+    authDomain: 'capstone-uniq.firebaseapp.com',
+    storageBucket: 'capstone-uniq.appspot.com',
+    measurementId: 'G-FVVFKHMVZP',
     databaseURL: 'https://capstone-uniq-default-rtdb.firebaseio.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCH0coacLwnxkwH7IBKcAEtvjymG14OWeM',
-    appId: '1:657429260211:android:ac1c03408436ce51ba0dc6',
-    messagingSenderId: '657429260211',
-    projectId: 'hcie-yous-935a1',
-    storageBucket: 'hcie-yous-935a1.appspot.com',
+    apiKey: 'AIzaSyD1Lj45cNhtoQKUH3Dc0dPcwG_55-q8as8',
+    appId: '1:649232623400:android:eb41468cb3bc0b3c9d121d',
+    messagingSenderId: '649232623400',
+    projectId: 'capstone-uniq',
+    storageBucket: 'capstone-uniq.appspot.com',
     databaseURL: 'https://capstone-uniq-default-rtdb.firebaseio.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCkHDfvi9yWq2g7KEElI2mPauBktOuLWGk',
-    appId: '1:657429260211:ios:9c493ed22e47646aba0dc6',
-    messagingSenderId: '657429260211',
-    projectId: 'hcie-yous-935a1',
-    storageBucket: 'hcie-yous-935a1.appspot.com',
-    iosClientId: '657429260211-kjm01nhvumabbfau3mc1kdl2f9vke0ui.apps.googleusercontent.com',
-    iosBundleId: 'com.example.yous',
-    databaseURL: 'https://capstone-uniq-default-rtdb.firebaseio.com',
+    apiKey: 'AIzaSyCsyzyncpC4F6TeRXuiS7SurBiIwzMnQwo',
+    appId: '1:649232623400:ios:89461b45f6b1217c9d121d',
+    messagingSenderId: '649232623400',
+    projectId: 'capstone-uniq',
+    storageBucket: 'capstone-uniq.appspot.com',
+    iosClientId: '649232623400-lanvdvs0mdjtok2q5p1an5e7ejmari0b.apps.googleusercontent.com',
+    iosBundleId: 'com.example.handongHanBakwi',
   );
 }

@@ -18,6 +18,8 @@ import 'package:handong_han_bakwi/src/HostGameUI.dart';
 import 'app_state.dart';
 import 'firebase_options.dart';
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -187,3 +189,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

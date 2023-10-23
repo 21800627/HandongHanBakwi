@@ -48,8 +48,19 @@ class StartGamePage extends StatelessWidget {
                 ),
                 child: const Text('Exit'),
                 onPressed: () {
-                  Navigator.of(context).pop();
-                  context.push('/');
+                  if(appState.isHost){
+                    appState.deleteGameRoom(hostKey).then((value){
+                      context.push('/');
+                      Navigator.pop(context);
+                    }
+                    );
+                  }else{
+                    appState.removePlayer(hostKey).then((value){
+                      context.push('/');
+                      Navigator.pop(context);
+                    }
+                    );
+                  }
                 },
               ),
             ],
@@ -65,7 +76,7 @@ class StartGamePage extends StatelessWidget {
 
         appState.updateDiceValue(hostKey, value);
         //_addPlayerSteps();
-        //showQCardOverlay(context, appState);
+        showQCardOverlay(context, appState);
 
       });
     }

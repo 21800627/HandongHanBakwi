@@ -264,36 +264,36 @@ class StartGamePage extends StatelessWidget {
 
         return Stack(
           children: [
-            // Display start image (투명도 80)
+            // Display start image
             if (viewIndex == 0)
               Center(
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    Color(0xffC4DFDF).withOpacity(0.2), // 80% opacity and color 0xffC4DFDF
+                    Color(0xffC4DFDF).withOpacity(0.2),
                     BlendMode.srcATop,
                   ),
                   child: Image.asset(imagePaths[0]),
                 ),
               ),
 
-            // Display end image with 60% opacity and color 0xffC4DFDF
+            // Display end image
             if (viewIndex == _boardTileCount - 1)
               Center(
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    Color(0xffC4DFDF).withOpacity(0.2), // 80% opacity and color 0xffC4DFDF
+                    Color(0xffC4DFDF).withOpacity(0.2),
                     BlendMode.srcATop,
                   ),
                   child: Image.asset(imagePaths[_boardTileCount - 1]),
                 ),
               ),
 
-            // Display other images with 60% opacity and color 0xffC4DFDF
+            // Display other images
             if (viewIndex != 0 && viewIndex != _boardTileCount - 1)
               Center(
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    Color(0xffC4DFDF).withOpacity(0.2), // 60% opacity and color 0xffC4DFDF
+                    Color(0xffC4DFDF).withOpacity(0.2),
                     BlendMode.srcATop,
                   ),
                   child: Image.asset(imagePaths[viewIndex]),

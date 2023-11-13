@@ -3,7 +3,12 @@
 import 'package:flutter/material.dart';
 
 class CHCard extends StatefulWidget {
-  CHCard({Key? key}) : super(key: key);
+  //CHCard({Key? key}) : super(key: key);
+
+
+  String message;
+  CHCard({super.key, required this.message});
+
 
   @override
   _CHCardState createState() => _CHCardState();
@@ -12,9 +17,9 @@ class CHCard extends StatefulWidget {
 class _CHCardState extends State<CHCard> {
   int clickedCardIndex = -1; // 클릭된 서브 카드의 인덱스
   List<String> subCardImages = [
-    'assets/images/3.png',  //다른 이미지로 바꾸기
-    'assets/images/4.png',  //다른 이미지로 바꾸기
-    'assets/images/5.png',  //다른 이미지로 바꾸기
+    'assets/images/CHfront1.png',
+    'assets/images/CHfront2.png',
+    'assets/images/CHfront3.png',
   ];
 
   List<bool> subCardClickable = [true, true, true]; // 카드 클릭 가능 여부
@@ -35,7 +40,8 @@ class _CHCardState extends State<CHCard> {
 
   Widget _buildMainCard(BuildContext context) {
     String mainCardText =
-    clickedCardIndex != -1 ? '축하합니다' : 'Main Front';
+    clickedCardIndex != -1 ? '축하합니다' : '카드를 선택해주세요';
+    //clickedCardIndex != -1 ? widget.message : '카드를 선택해주세요';
 
     return GestureDetector(
       onTap: () {
@@ -153,7 +159,7 @@ class _CHCardState extends State<CHCard> {
   void _toggleSubCard(int index) {
     setState(() {
       // 클릭된 서브 카드의 이미지 변경
-      subCardImages[index] = 'assets/images/6.png';  //다른 이미지로 바꾸기
+      subCardImages[index] = 'assets/images/CHback.png';
 
       // 클릭된 서브 카드 인덱스 업데이트
       clickedCardIndex = index;

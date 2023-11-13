@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:handong_han_bakwi/widgets/QCard.dart';
+import 'package:handong_han_bakwi/widgets/CHCard.dart';
 
 import 'models/QUESTION.dart';
 
@@ -28,6 +29,9 @@ void showWarningMessage(context, String title, String message){
 
 OverlayEntry? _qcard_overlayEntry;
 OverlayEntry? _exit_overlayEntry;
+OverlayEntry? _chcard_overlayEntry;
+
+
 
 void showQCardOverlay(BuildContext context, model) {
   final question = Question();
@@ -54,6 +58,41 @@ void showQCardOverlay(BuildContext context, model) {
   // Add the OverlayEntry to the Overlay.
   Overlay.of(context)?.insert(_qcard_overlayEntry!);
 }
+
+
+void showCHCardOverlay(BuildContext context, model) {
+  final question = Question();
+  assert(_chcard_overlayEntry == null);
+  _chcard_overlayEntry = OverlayEntry(
+    builder: (BuildContext context) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.grey,
+            ),
+            onPressed: hideCHCardOverlay,
+            child: const Icon(
+              Icons.close,
+            ),
+          ),
+          CHCard(message: question.getQuestion(),),
+        ],
+      );
+    },
+  );
+  // Add the OverlayEntry to the Overlay.
+  Overlay.of(context)?.insert(_chcard_overlayEntry!);
+}
+
+void hideCHCardOverlay() {
+  _chcard_overlayEntry?.remove();
+  _chcard_overlayEntry = null;
+}
+
+
+
 // overlay를 리턴해서 페이지내에석  삭제하는 걸로 바꾸기!!
 void ShowGameOverOverlay(BuildContext context) {
   assert(_exit_overlayEntry == null);

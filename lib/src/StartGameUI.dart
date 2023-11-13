@@ -69,18 +69,25 @@ class StartGamePage extends StatelessWidget {
       );
     }
   }
+
   // when roll dice animation ends, add player score
   void _diceOnPressed(context, appState) async {
     if(!appState.isGameOver && appState.isTurn){
       await diceKey.currentState?.rollDice().then((value) {
 
         appState.updateDiceValue(hostKey, value);
-        //_addPlayerSteps();
-        showQCardOverlay(context, appState);
-
+        //showQCardOverlay(context, appState);
+        if (value % 2 == 0) {
+          showQCardOverlay(context, appState);
+        }
+        else {
+          showCHCardOverlay(context, appState);
+        }
       });
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {

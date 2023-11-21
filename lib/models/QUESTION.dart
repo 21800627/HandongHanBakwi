@@ -251,12 +251,12 @@ class Question {
     ],
   
 
-  final Map<String, dynamic> question =
-        questions[Random().nextInt(questions.length)];
+  final Map<String, dynamic> Question =
+        Question[Random().nextInt(Question.length)];
 
     final int randomPoints = Random().nextInt(71) + 30; // Generates random points between 30 and 100
 
-    question['points'] = randomPoints;
+    Question['points'] = randomPoints;
 
-    return question;
+    return Question;
 }

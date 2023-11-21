@@ -249,9 +249,14 @@ class Question {
             "Is there anything you have always wanted to do but haven't been able to do yet? Why not?",
             "What do you think life would be like without the internet?"
     ],
+  
 
-  String getQuestion(){
-    int index = Random().nextInt(questionList.length);
-    return questionList[index];
-  }
+  final Map<String, dynamic> question =
+        questions[Random().nextInt(questions.length)];
+
+    final int randomPoints = Random().nextInt(71) + 30; // Generates random points between 30 and 100
+
+    question['points'] = randomPoints;
+
+    return question;
 }

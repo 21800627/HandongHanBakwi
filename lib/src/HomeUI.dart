@@ -37,9 +37,12 @@ class HomeScreen extends StatelessWidget {
               ),
               Visibility(
                 visible: appState.loggedIn,
-                child: Text(
-                  'Room List',
-                  style: Theme.of(context).textTheme.headline3,
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(0, 70, 0, 40),
+                  child: Text(
+                    'Room List',
+                    style: Theme.of(context).textTheme.headline3,
+                  ),
                 ),
               ),
               Visibility(
@@ -71,47 +74,49 @@ class HomeScreen extends StatelessWidget {
                           ));
                         });
                       }
-                      return Container(
-                        //Todo: 하진
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: Expanded(
+                      return Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.fromLTRB(0,0,0,40),
+                          width: MediaQuery.of(context).size.width * 0.5,
                           child: ListView(
                             shrinkWrap: true,
                             children:tileList,
                           ),
                         ),
-
                       );
                     }
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AuthFunc(
-                      loggedIn: appState.loggedIn,
-                      signOut: () {
-                        FirebaseAuth.instance.signOut();
-                      }
-                  ),
-                  Visibility(
-                    visible: appState.loggedIn,
-                    child: Container(
-                      margin: const EdgeInsets.all(8),
-                      width: MediaQuery.of(context).size.width * 0.25,
-                      child: OutlinedButton(
-                          onPressed: () async {
-                            // appState.createGame().then((value) {
-                            //   print('query value: $value');
-                            //   context.go('/waiting-room/$value');
-                            // });
-                            context.go('/host-game');
-                          },
-                          child: const Text('Host Game')
+              Padding(
+                padding: const EdgeInsets.only(bottom:30),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AuthFunc(
+                        loggedIn: appState.loggedIn,
+                        signOut: () {
+                          FirebaseAuth.instance.signOut();
+                        }
+                    ),
+                    Visibility(
+                      visible: appState.loggedIn,
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        child: OutlinedButton(
+                            onPressed: () async {
+                              // appState.createGame().then((value) {
+                              //   print('query value: $value');
+                              //   context.go('/waiting-room/$value');
+                              // });
+                              context.go('/host-game');
+                            },
+                            child: const Text('Host Game')
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           );

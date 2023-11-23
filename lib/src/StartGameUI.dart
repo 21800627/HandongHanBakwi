@@ -100,8 +100,10 @@ class StartGamePage extends StatelessWidget {
               final players = gameData.players;
               final tileList = <ListTile>[];
 
+              print('gameData.isOver: ${gameData.isOver}');
+              print('hostKey: ${hostKey}');
               if(gameData.isOver){
-                ShowGameOverOverlay(context);
+                context.go('/ranking/${hostKey}');
               }
 
               for (int i=0; i<players.length; i++) {
@@ -180,10 +182,14 @@ class StartGamePage extends StatelessWidget {
                                 }
 
                                 return Card(
+                                  shape: RoundedRectangleBorder(
+
+                                    side: const BorderSide(width: 2.0, color: Color(0xff383838)),
+                                  ),
                                   // padding: const EdgeInsets.all(5),
                                   margin: const EdgeInsets.all(3),
-                                  color: Color(colorValue),
-                                  elevation: 2,
+                                  //color: Color(colorValue),
+                                  //elevation: 2,
                                   child: _buildTile(players, viewIndex),
                                 );
                               },
@@ -216,6 +222,19 @@ class StartGamePage extends StatelessWidget {
   }
   _buildTile(players, viewIndex) => LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
+        List<bool> _visible = List.generate(_boardTileCount, (index) => true);
+        List<List<bool>> _playersVisible = List.generate(players.length, (index) => _visible);
+        for(int i=0; i<players.length; i++){
+          bool _isOdd = (viewIndex%2==0);
+          if(players[i].step < viewIndex){
+            if(_isOdd){
+              _playersVisible[i][viewIndex] = false;
+            }else{
+              _playersVisible[i][viewIndex] = true;
+            }
+          }
+        }
+
         double parentWidth = constraints.maxWidth;
         double parentHeight = constraints.maxHeight;
 
@@ -303,10 +322,17 @@ class StartGamePage extends StatelessWidget {
             for(int i=0; i<players.length; i++)...[
               if(players[i].step == viewIndex)
                 playerWidget[i],
+                // AnimatedOpacity(
+                //   // If the widget is visible, animate to 0.0 (invisible).
+                //   // If the widget is hidden, animate to 1.0 (fully visible).
+                //   opacity: _playersVisible[i][viewIndex] ? 1.0 : 0.0,
+                //   duration: const Duration(milliseconds: 500),
+                //   // The green box must be a child of the AnimatedOpacity widget.
+                //   child: playerWidget[i],
+                // )
             ]
           ],
         );
-
       }
   );
 }

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart'
-    hide EmailAuthProvider, PhoneAuthProvider;
+    hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -166,8 +166,6 @@ class ApplicationState extends ChangeNotifier {
         print('totalStep: $totalStep, dice: $dice, step: ${players[_uid]['step']}');
         players[_uid]['step'] = totalStep;
 
-        gameData['players'] = players;
-
         if(_uid == players.keys.last){
           gameData['currentPlayerId'] = players.keys.first;
         }else{
@@ -178,11 +176,14 @@ class ApplicationState extends ChangeNotifier {
 
         if(totalStep >= 40){
           gameData['isOver'] = true;
+          players[_uid]['isOver'] = true;
           _isGameOver = true;
         }
       }
 
       gameData['diceValue'] = sum;
+      gameData['players'] = players;
+
       updates['/games/$hostKey'] = gameData;
       print(updates);
 
@@ -327,6 +328,28 @@ class ApplicationState extends ChangeNotifier {
         print('playerLIst name: ${value1.name}, step: ${value1.step}');
       }
       return playersList;
+    });
+
+    notifyListeners();
+    return playersStream;
+  }
+  Stream<Player> searchWinnerInfo(String hostKey){
+    final DatabaseReference _database = FirebaseDatabase.instance.ref();
+    final results = _database.child('games/$hostKey/players').onValue;
+
+    print('====searchPlayerInfo=====');
+    print('hostKey: $hostKey');
+
+    final playersStream = results.map((event){
+      final players = event.snapshot.value as Map<String, dynamic>;
+
+      for(var p in players.entries){
+        if(p.value['isOver']){
+          return Player({p.key: p.value});
+        }
+      }
+      print('cannot find winner...');
+      return Player({'null': 'cannot find winner'});
     });
 
     notifyListeners();

@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart'; // new
+import 'package:handong_han_bakwi/src/RankingUI.dart';
 import 'package:handong_han_bakwi/src/StartGameUI.dart';
 import 'package:handong_han_bakwi/src/WaitingRoomUI.dart';
 
@@ -136,6 +139,13 @@ final _router = GoRouter(
             // );
           }
         ),
+        GoRoute(
+          path: 'ranking/:hostKey',
+          builder: (context, state){
+            final String hostKey = state.pathParameters['hostKey'].toString();
+            return RankingPage(hostKey: hostKey,);
+          }
+        ),
         // GoRoute(
         //   path: 'start-game/:hostKey',
         //   builder: (context, state){
@@ -177,13 +187,15 @@ class MyApp extends StatelessWidget {
     var baseTheme = ThemeData(brightness: brightness);
 
     return baseTheme.copyWith(
-      textTheme: GoogleFonts.bungeeTextTheme(baseTheme.textTheme),
+      textTheme: GoogleFonts.blackHanSansTextTheme(baseTheme.textTheme),
+      //textTheme: ,
       backgroundColor: Color(0xffFAFAFA),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           primary: Colors.white,
           backgroundColor: const Color(0xff00A3CE),
           side: const BorderSide(width: 2.0, color: Color(0xff383838)),
+          padding: EdgeInsets.fromLTRB(8, 16, 8, 16)
         ),
       ),
     );

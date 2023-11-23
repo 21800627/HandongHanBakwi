@@ -50,7 +50,7 @@ void showQCardOverlay(BuildContext context, model) {
               Icons.close,
             ),
           ),
-          QCard(message: question.getQuestion(),),
+          QCard(message: question.Question(),), //getQuestion
         ],
       );
     },
@@ -77,18 +77,13 @@ void showCHCardOverlay(BuildContext context, model) {
               Icons.close,
             ),
           ),
-          CHCard(message: question.getQuestion(),),
+          CHCard(message: question.Question(),), //getQuestion()
         ],
       );
     },
   );
   // Add the OverlayEntry to the Overlay.
   Overlay.of(context)?.insert(_chcard_overlayEntry!);
-}
-
-void hideCHCardOverlay() {
-  _chcard_overlayEntry?.remove();
-  _chcard_overlayEntry = null;
 }
 
 
@@ -125,4 +120,8 @@ void hideQCardOverlay() {
 void hideGameOverOverlay() {
   _exit_overlayEntry?.remove();
   _exit_overlayEntry = null;
+}
+void hideCHCardOverlay() {
+  _chcard_overlayEntry?.remove();
+  _chcard_overlayEntry = null;
 }

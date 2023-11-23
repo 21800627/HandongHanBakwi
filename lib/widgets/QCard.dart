@@ -12,7 +12,7 @@ class QCard extends StatelessWidget {
 
     return Card(
       elevation: 0.0,
-      //color: Colors.transparent,
+      color: Colors.transparent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

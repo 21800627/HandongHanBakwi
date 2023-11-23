@@ -30,7 +30,7 @@ class _CHCardState extends State<CHCard> {
       elevation: 0.0,
       color: Colors.transparent,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           _buildMainCard(context), // 메인 카드
         ],
@@ -52,14 +52,9 @@ class _CHCardState extends State<CHCard> {
         }
       },
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.5,
-        height: MediaQuery.of(context).size.height * 0.5,
-        padding: EdgeInsets.only(
-          left: 30.0,
-          right: 30.0,
-          top: 32.0,
-          bottom: 32.0,
-        ),
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.8,
+
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -78,11 +73,10 @@ class _CHCardState extends State<CHCard> {
             Text(
               mainCardText,
               style: Theme.of(context)
-                  .textTheme
-                  .headline6!
+                  .textTheme.headline6!
                   .copyWith(fontSize: 24.0),
             ),
-            SizedBox(height: 16.0),
+            //SizedBox(height: 16.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -117,11 +111,9 @@ class _CHCardState extends State<CHCard> {
       child: Stack(
         children: [
           AnimatedContainer(
-            width: MediaQuery.of(context).size.width * 0.1 * scaleFactor,
-            height: MediaQuery.of(context).size.height * 0.1 * scaleFactor,
+            width: MediaQuery.of(context).size.width * 0.2 * scaleFactor,
+            height: MediaQuery.of(context).size.height * 0.15 * scaleFactor,
             duration: Duration(milliseconds: 500),
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(4.0),
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(subCardImage),

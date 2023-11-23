@@ -71,7 +71,7 @@ class Board_2_Screen extends StatelessWidget{
   void _diceOnPressed(context, model) async {
     if(!model.isGameOver()){
       await diceKey.currentState?.rollDice().then((value){
-        model.setQuestion(Question().getQuestion());
+        model.setQuestion(Question().Question()); //getQuestion
         model.setDiceValue(value);
 
         model.addPlayerSteps(value);

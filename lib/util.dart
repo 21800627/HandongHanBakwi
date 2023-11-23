@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:handong_han_bakwi/widgets/QCard.dart';
 import 'package:handong_han_bakwi/widgets/CHCard.dart';
 
+import 'models/CHCQUESTION.dart';
 import 'models/QUESTION.dart';
 
 void showWarningMessage(context, String title, String message){
@@ -34,7 +35,7 @@ OverlayEntry? _chcard_overlayEntry;
 
 
 void showQCardOverlay(BuildContext context, model) {
-  final question = Question();
+  final question = Question().getRandomQuestion();
   assert(_qcard_overlayEntry == null);
   _qcard_overlayEntry = OverlayEntry(
     builder: (BuildContext context) {
@@ -50,7 +51,10 @@ void showQCardOverlay(BuildContext context, model) {
               Icons.close,
             ),
           ),
-          QCard(message: question.Question(),), //getQuestion
+          QCard(
+            koreanMessage: question['Korean'],
+            englishMessage: question['English'],
+          ),
         ],
       );
     },
@@ -61,7 +65,7 @@ void showQCardOverlay(BuildContext context, model) {
 
 
 void showCHCardOverlay(BuildContext context, model) {
-  final question = Question();
+  final chcq = CHCQuestion();
   assert(_chcard_overlayEntry == null);
   _chcard_overlayEntry = OverlayEntry(
     builder: (BuildContext context) {
@@ -77,13 +81,18 @@ void showCHCardOverlay(BuildContext context, model) {
               Icons.close,
             ),
           ),
-          CHCard(message: question.Question(),), //getQuestion()
+          CHCard(message: chcq.getRandomCHC(),),
         ],
       );
     },
   );
   // Add the OverlayEntry to the Overlay.
   Overlay.of(context)?.insert(_chcard_overlayEntry!);
+}
+
+void hideCHCardOverlay() {
+  _chcard_overlayEntry?.remove();
+  _chcard_overlayEntry = null;
 }
 
 
@@ -120,8 +129,4 @@ void hideQCardOverlay() {
 void hideGameOverOverlay() {
   _exit_overlayEntry?.remove();
   _exit_overlayEntry = null;
-}
-void hideCHCardOverlay() {
-  _chcard_overlayEntry?.remove();
-  _chcard_overlayEntry = null;
 }

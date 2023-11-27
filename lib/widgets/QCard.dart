@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 
-class QCard extends StatelessWidget {
-  String koreanMessage;
-  String englishMessage;
+class QCard extends StatefulWidget {
+  final String koreanMessage;
+  final String englishMessage;
 
-  QCard({super.key, required this.koreanMessage, required this.englishMessage});
+  QCard({Key? key, required this.koreanMessage, required this.englishMessage})
+      : super(key: key);
+
+  @override
+  _QCardState createState() => _QCardState();
+}
+
+class _QCardState extends State<QCard> {
+  bool isKorean = false; // Start with English
 
   @override
   Widget build(BuildContext context) {
@@ -19,29 +27,37 @@ class QCard extends StatelessWidget {
         children: [
           FlipCard(
             direction: FlipDirection.HORIZONTAL,
-            side: CardSide.FRONT,
-            speed: 500,
-            onFlipDone: (status) {
-              print(status);
-            },
+            flipOnTouch: true,
             front: Container(
               width: cardWidth,
               height: cardHeight,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/Qback.png'),
-                  fit: BoxFit.contain,
+                  fit: BoxFit.fill,
                 ),
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
               child: Center(
-                child: Text(
-                  // Display either Korean or English message based on user preference
-                  // For example, you can check a language variable and show the corresponding message
-                  // This is just a placeholder, adjust according to your actual logic
-                  "Korean Language ? ${koreanMessage} : ${englishMessage}",
-                  style: Theme.of(context).textTheme.subtitle2,
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child:Text(
+                        widget.englishMessage,
+                        style: Theme.of(context).textTheme.subtitle2,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                    SizedBox(height: 16), // Adjust the spacing
+                    Text(
+                      widget.koreanMessage,
+                      style: Theme.of(context).textTheme.subtitle2,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -51,7 +67,7 @@ class QCard extends StatelessWidget {
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/Qback.png'),
-                  fit: BoxFit.contain,
+                  fit: BoxFit.fill,
                 ),
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),

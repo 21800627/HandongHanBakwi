@@ -9,7 +9,7 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert'; // Import for JSON decoding
 import 'dart:math'; // Import for random number generation
-import 'package:animated_text_kit/animated_text_kit.dart';
+//import 'package:animated_text_kit/animated_text_kit.dart';
 
 
 class BoardGameScreenState extends StatelessWidget{

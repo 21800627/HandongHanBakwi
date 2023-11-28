@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart'; // new
+import 'package:handong_han_bakwi/src/RankingUI.dart';
 import 'package:handong_han_bakwi/src/StartGameUI.dart';
 import 'package:handong_han_bakwi/src/WaitingRoomUI.dart';
 
@@ -120,20 +123,28 @@ final _router = GoRouter(
           path: 'waiting-room/:hostKey',
           builder: (context, state) {
             final String hostKey = state.pathParameters['hostKey'].toString();
-            return WaitingRoomPage(hostKey: hostKey,);
+            return WaitingRoomPage();
           },
         ),
         GoRoute(
-          path: 'start-game/:hostKey',
+          path: 'start-game',
           builder: (context, state){
             final String hostKey = state.pathParameters['hostKey'].toString();
-            return StartGamePage(hostKey: hostKey,);
+            return StartGamePage();
             // return ChangeNotifierProvider.value(
             //   value: Game(roundNum: 1,playerNum: 2),
             //   child: Consumer<Game>(
             //     builder: (context, game, _) => StartGamePage(hostKey: hostKey),
             //   ),
             // );
+          }
+        ),
+        GoRoute(
+          //path: 'ranking/:hostKey',
+          path: 'ranking',
+          builder: (context, state){
+            final String hostKey = state.pathParameters['hostKey'].toString();
+            return RankingPage();
           }
         ),
         // GoRoute(
@@ -177,13 +188,15 @@ class MyApp extends StatelessWidget {
     var baseTheme = ThemeData(brightness: brightness);
 
     return baseTheme.copyWith(
-      textTheme: GoogleFonts.bungeeTextTheme(baseTheme.textTheme),
+      textTheme: GoogleFonts.blackHanSansTextTheme(baseTheme.textTheme),
+      //textTheme: ,
       backgroundColor: Color(0xffFAFAFA),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           primary: Colors.white,
           backgroundColor: const Color(0xff00A3CE),
           side: const BorderSide(width: 2.0, color: Color(0xff383838)),
+          padding: EdgeInsets.fromLTRB(8, 16, 8, 16)
         ),
       ),
     );

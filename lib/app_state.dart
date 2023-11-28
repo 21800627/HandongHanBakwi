@@ -8,9 +8,6 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
-import 'models/QUESTION.dart';
-import 'package:handong_han_bakwi/widgets/QCard.dart';
-
 
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
@@ -27,13 +24,6 @@ class ApplicationState extends ChangeNotifier {
   bool get isHost => _isHost;
   bool get isGameOver => _isGameOver;
   bool get isTurn => _isTurn;
-
-  ///
-  String koreanMessage = '';
-  String englishMessage = '';
-  String _currentQuestion = '';
-  String get currentQuestion => _currentQuestion;
-  ///
 
   Future<void> init() async {
     await Firebase.initializeApp(
@@ -199,7 +189,6 @@ class ApplicationState extends ChangeNotifier {
       _database.update(updates);
     });
   }
-
   void updatePlayerInfo(String hostKey){
     final DatabaseReference _database = FirebaseDatabase.instance.ref();
     final results = _database.child('games/$hostKey').get();
@@ -343,12 +332,6 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
     return playersStream;
   }
-
- ///
-
-///
-
-
 }
 
 class GameRoom{

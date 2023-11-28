@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart'
 
 import '../app_state.dart';
 import '../auth/authentication.dart';
+import '../models/GAMEROOM.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,7 +21,7 @@ class HomeScreen extends StatelessWidget {
       // ),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _){
-          print('appState: ${appState.loggedIn}');
+          print('appState loggedIn: ${appState.loggedIn}');
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -37,25 +38,28 @@ class HomeScreen extends StatelessWidget {
               ),
               Visibility(
                 visible: appState.loggedIn,
-                child: Text(
-                  'Room List',
-                  style: Theme.of(context).textTheme.headline3,
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(0, 70, 0, 40),
+                  child: Text(
+                    'Room List',
+                    style: Theme.of(context).textTheme.headline3,
+                  ),
                 ),
               ),
               Visibility(
                 visible: appState.loggedIn,
                 child: StreamBuilder(
-                    stream: appState.getGameStream(),
+                    stream: appState.getGameListStream(),
                     builder: (context, snapshot) {
                       final tileList = <ListTile>[];
+                      print('getGameStream: ${snapshot.connectionState}');
                       if(snapshot.hasError){
                         print('getGameStream: ${snapshot.error}');
                         print('getGameStream: ${snapshot.data}');
                       }
                       if(snapshot.hasData){
-                        print('getGameStream: ${snapshot.connectionState}');
                         int index = 0;
-                        final games = snapshot.data;
+                        final List<GameRoom> games = snapshot.data ?? [];
                         games?.forEach((element) {
                           index++;
                           tileList.add(ListTile(
@@ -71,47 +75,49 @@ class HomeScreen extends StatelessWidget {
                           ));
                         });
                       }
-                      return Container(
-                        //Todo: 하진
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: Expanded(
+                      return Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.fromLTRB(0,0,0,40),
+                          width: MediaQuery.of(context).size.width * 0.5,
                           child: ListView(
                             shrinkWrap: true,
                             children:tileList,
                           ),
                         ),
-
                       );
                     }
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AuthFunc(
-                      loggedIn: appState.loggedIn,
-                      signOut: () {
-                        FirebaseAuth.instance.signOut();
-                      }
-                  ),
-                  Visibility(
-                    visible: appState.loggedIn,
-                    child: Container(
-                      margin: const EdgeInsets.all(8),
-                      width: MediaQuery.of(context).size.width * 0.25,
-                      child: OutlinedButton(
-                          onPressed: () async {
-                            // appState.createGame().then((value) {
-                            //   print('query value: $value');
-                            //   context.go('/waiting-room/$value');
-                            // });
-                            context.go('/host-game');
-                          },
-                          child: const Text('Host Game')
+              Padding(
+                padding: const EdgeInsets.only(bottom:30),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AuthFunc(
+                        loggedIn: appState.loggedIn,
+                        signOut: () {
+                          FirebaseAuth.instance.signOut();
+                        }
+                    ),
+                    Visibility(
+                      visible: appState.loggedIn,
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        child: OutlinedButton(
+                            onPressed: () async {
+                              // appState.createGame().then((value) {
+                              //   print('query value: $value');
+                              //   context.go('/waiting-room/$value');
+                              // });
+                              context.go('/host-game');
+                            },
+                            child: const Text('Host Game')
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           );

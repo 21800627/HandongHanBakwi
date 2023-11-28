@@ -4,7 +4,35 @@ import 'package:provider/provider.dart';
 import '../models/BOARD.dart';
 import '../models/GAME.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flip_card/flip_card.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:convert'; // Import for JSON decoding
+import 'dart:math'; // Import for random number generation
+//import 'package:animated_text_kit/animated_text_kit.dart';
+
+
 class BoardGameScreenState extends StatelessWidget{
+  String message;
+  BoardGameScreenState({Key? key, required this.message}) : super(key: key);
+
+  Future<Map<String, dynamic>> loadJsonData() async {
+    final jsonText = await rootBundle.loadString('assets/Questions.json');
+    final jsonData = json.decode(jsonText);
+
+    final List<dynamic> englishQuestions = jsonData["english"];
+    final List<dynamic> koreanQuestions = jsonData["korean"];
+
+    final int randomIndex = Random().nextInt(englishQuestions.length);
+
+    final Map<String, dynamic> randomQuestions = {
+      "english": englishQuestions[randomIndex],
+      "korean": koreanQuestions[randomIndex],
+      "points": Random().nextInt(51), // You can set points to a default value or leave it empty
+    };
+
+    return randomQuestions;
+  }
 
   final int _boardCol=8;
   final int _boardTileCount=40;

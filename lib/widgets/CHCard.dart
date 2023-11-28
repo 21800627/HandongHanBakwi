@@ -3,7 +3,12 @@
 import 'package:flutter/material.dart';
 
 class CHCard extends StatefulWidget {
-  CHCard({Key? key}) : super(key: key);
+  //CHCard({Key? key}) : super(key: key);
+
+
+  String message;
+  CHCard({super.key, required this.message});
+
 
   @override
   _CHCardState createState() => _CHCardState();
@@ -12,9 +17,9 @@ class CHCard extends StatefulWidget {
 class _CHCardState extends State<CHCard> {
   int clickedCardIndex = -1; // 클릭된 서브 카드의 인덱스
   List<String> subCardImages = [
-    'assets/images/3.png',  //다른 이미지로 바꾸기
-    'assets/images/4.png',  //다른 이미지로 바꾸기
-    'assets/images/5.png',  //다른 이미지로 바꾸기
+    'assets/images/CHfront1.png',
+    'assets/images/CHfront2.png',
+    'assets/images/CHfront3.png',
   ];
 
   List<bool> subCardClickable = [true, true, true]; // 카드 클릭 가능 여부
@@ -25,7 +30,7 @@ class _CHCardState extends State<CHCard> {
       elevation: 0.0,
       color: Colors.transparent,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           _buildMainCard(context), // 메인 카드
         ],
@@ -35,7 +40,8 @@ class _CHCardState extends State<CHCard> {
 
   Widget _buildMainCard(BuildContext context) {
     String mainCardText =
-    clickedCardIndex != -1 ? '축하합니다' : 'Main Front';
+    clickedCardIndex != -1 ? '축하합니다' : '카드를 선택해주세요';
+    //clickedCardIndex != -1 ? widget.message : '카드를 선택해주세요';
 
     return GestureDetector(
       onTap: () {
@@ -46,14 +52,9 @@ class _CHCardState extends State<CHCard> {
         }
       },
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.5,
-        height: MediaQuery.of(context).size.height * 0.5,
-        padding: EdgeInsets.only(
-          left: 30.0,
-          right: 30.0,
-          top: 32.0,
-          bottom: 32.0,
-        ),
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.8,
+
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -72,11 +73,10 @@ class _CHCardState extends State<CHCard> {
             Text(
               mainCardText,
               style: Theme.of(context)
-                  .textTheme
-                  .headline6!
+                  .textTheme.headline6!
                   .copyWith(fontSize: 24.0),
             ),
-            SizedBox(height: 16.0),
+            //SizedBox(height: 16.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -111,11 +111,9 @@ class _CHCardState extends State<CHCard> {
       child: Stack(
         children: [
           AnimatedContainer(
-            width: MediaQuery.of(context).size.width * 0.1 * scaleFactor,
-            height: MediaQuery.of(context).size.height * 0.1 * scaleFactor,
+            width: MediaQuery.of(context).size.width * 0.2 * scaleFactor,
+            height: MediaQuery.of(context).size.height * 0.15 * scaleFactor,
             duration: Duration(milliseconds: 500),
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.all(4.0),
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(subCardImage),
@@ -153,7 +151,7 @@ class _CHCardState extends State<CHCard> {
   void _toggleSubCard(int index) {
     setState(() {
       // 클릭된 서브 카드의 이미지 변경
-      subCardImages[index] = 'assets/images/6.png';  //다른 이미지로 바꾸기
+      subCardImages[index] = 'assets/images/CHback.png';
 
       // 클릭된 서브 카드 인덱스 업데이트
       clickedCardIndex = index;

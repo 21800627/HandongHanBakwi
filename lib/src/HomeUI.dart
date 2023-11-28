@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart'
 
 import '../app_state.dart';
 import '../auth/authentication.dart';
+import '../models/GAMEROOM.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,7 +21,7 @@ class HomeScreen extends StatelessWidget {
       // ),
       body: Consumer<ApplicationState>(
         builder: (context, appState, _){
-          print('appState: ${appState.loggedIn}');
+          print('appState loggedIn: ${appState.loggedIn}');
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -48,17 +49,17 @@ class HomeScreen extends StatelessWidget {
               Visibility(
                 visible: appState.loggedIn,
                 child: StreamBuilder(
-                    stream: appState.getGameStream(),
+                    stream: appState.getGameListStream(),
                     builder: (context, snapshot) {
                       final tileList = <ListTile>[];
+                      print('getGameStream: ${snapshot.connectionState}');
                       if(snapshot.hasError){
                         print('getGameStream: ${snapshot.error}');
                         print('getGameStream: ${snapshot.data}');
                       }
                       if(snapshot.hasData){
-                        print('getGameStream: ${snapshot.connectionState}');
                         int index = 0;
-                        final games = snapshot.data;
+                        final List<GameRoom> games = snapshot.data ?? [];
                         games?.forEach((element) {
                           index++;
                           tileList.add(ListTile(

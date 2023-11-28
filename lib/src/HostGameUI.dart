@@ -4,43 +4,12 @@ import 'package:provider/provider.dart';
 
 import '../app_state.dart';
 
-class HostGamePage extends StatefulWidget {
-  const HostGamePage({Key? key}) : super(key: key);
+class HostGamePage extends StatelessWidget {
 
-  @override
-  _HostGamePageState createState() => _HostGamePageState();
-}
-
-class _HostGamePageState extends State<HostGamePage> {
+  HostGamePage({Key? key}) : super(key: key);
 
   final codeController = TextEditingController();
   final numberController = TextEditingController();
-
-  void _printLatestValue_code() {
-    final text = codeController.text;
-    print('first text field: $text (${text.characters.length})');
-  }
-  void _printLatestValue_num() {
-    final text = numberController.text;
-    print('Second text field: $text (${text.characters.length})');
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Start listening to changes.
-    codeController.addListener(_printLatestValue_code);
-    numberController.addListener(_printLatestValue_num);
-  }
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is removed from the
-    // widget tree.
-    codeController.dispose();
-    numberController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,8 +57,6 @@ class _HostGamePageState extends State<HostGamePage> {
                     width: MediaQuery.of(context).size.width * 0.25,
                     child: OutlinedButton(
                         onPressed: () {
-                          print('${codeController.text}');
-                          //appState.setCurrentPlayer(widget.hostKey);
                           var code = codeController.text;
                           var num = int.parse(numberController.text);
 

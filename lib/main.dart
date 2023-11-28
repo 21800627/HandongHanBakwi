@@ -123,14 +123,14 @@ final _router = GoRouter(
           path: 'waiting-room/:hostKey',
           builder: (context, state) {
             final String hostKey = state.pathParameters['hostKey'].toString();
-            return WaitingRoomPage(hostKey: hostKey,);
+            return WaitingRoomPage();
           },
         ),
         GoRoute(
-          path: 'start-game/:hostKey',
+          path: 'start-game',
           builder: (context, state){
             final String hostKey = state.pathParameters['hostKey'].toString();
-            return StartGamePage(hostKey: hostKey,);
+            return StartGamePage();
             // return ChangeNotifierProvider.value(
             //   value: Game(roundNum: 1,playerNum: 2),
             //   child: Consumer<Game>(
@@ -140,10 +140,11 @@ final _router = GoRouter(
           }
         ),
         GoRoute(
-          path: 'ranking/:hostKey',
+          //path: 'ranking/:hostKey',
+          path: 'ranking',
           builder: (context, state){
             final String hostKey = state.pathParameters['hostKey'].toString();
-            return RankingPage(hostKey: hostKey,);
+            return RankingPage();
           }
         ),
         // GoRoute(

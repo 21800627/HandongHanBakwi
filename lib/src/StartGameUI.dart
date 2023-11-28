@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:handong_han_bakwi/app_state.dart';
 import 'package:provider/provider.dart';
 
+import '../models/GAMEROOM.dart';
 import '../util.dart';
 import '../widgets/Dice.dart';
 
@@ -10,11 +11,10 @@ class StartGamePage extends StatelessWidget {
 
   final GlobalKey<DiceState> diceKey = GlobalKey<DiceState>();
 
-  final String hostKey;
   final int _boardCol=8;
   final int _boardTileCount=40;
 
-  StartGamePage({Key? key, required this.hostKey}) : super(key: key);
+  StartGamePage({Key? key}) : super(key: key);
 
   List<String> imagePaths = List.generate(40, (index) => 'assets/backgrounds/${index + 1}.png');
 
@@ -49,13 +49,13 @@ class StartGamePage extends StatelessWidget {
                 child: const Text('Exit'),
                 onPressed: () {
                   if(appState.isHost){
-                    appState.deleteGameRoom(hostKey).then((value){
+                    appState.deleteGameRoom().then((value){
                       context.push('/');
                       Navigator.pop(context);
                     }
                     );
                   }else{
-                    appState.removePlayer(hostKey).then((value){
+                    appState.removePlayer().then((value){
                       context.push('/');
                       Navigator.pop(context);
                     }
@@ -69,25 +69,13 @@ class StartGamePage extends StatelessWidget {
       );
     }
   }
-  // when roll dice animation ends, add player score
-  void _diceOnPressed(context, appState) async {
-    if(!appState.isGameOver && appState.isTurn){
-      await diceKey.currentState?.rollDice().then((value) {
-
-        appState.updateDiceValue(hostKey, value);
-        //_addPlayerSteps();
-        showQCardOverlay(context, appState);
-
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ApplicationState>(
         builder: (context, appState, _){
         return StreamBuilder(
-            stream: appState.searchGameInfoStream(hostKey),
+            stream: appState.searchGameInfoStream(),
             builder: (context, snapshot) {
               if(snapshot.hasError){
                 print('StartGameUI.dart 113: ${snapshot.error}');
@@ -96,14 +84,13 @@ class StartGamePage extends StatelessWidget {
                 print('StartGameUI.dart 116: no data');
               }
 
-              final gameData = snapshot.data ?? GameRoom();
-              final players = gameData.players;
+              final gameData = snapshot.data ?? GameRoom.fromRTDB(id: '', data: {});
+              final players = appState.playerList;
               final tileList = <ListTile>[];
 
               print('gameData.isOver: ${gameData.isOver}');
-              print('hostKey: ${hostKey}');
               if(gameData.isOver){
-                context.go('/ranking/${hostKey}');
+                context.go('/ranking');
               }
 
               for (int i=0; i<players.length; i++) {
@@ -200,7 +187,19 @@ class StartGamePage extends StatelessWidget {
                   ),
                   // dice
                   GestureDetector(
-                      onTap: () => _diceOnPressed(context, appState),
+                      onTap: ()async{
+                        if(appState.isTurn){
+                          await diceKey.currentState?.rollDice().then((value) {
+
+                            appState.updateDiceValue(value).then((value) =>
+                                appState.setCurrentPlayer()
+                            );
+                            //_addPlayerSteps();
+                            showQCardOverlay(context, appState);
+
+                          });
+                        }
+                      },
                       child: Dice(key: diceKey)
                   ),
                   // player list
@@ -310,13 +309,7 @@ class StartGamePage extends StatelessWidget {
             // Display other images
             if (viewIndex != 0 && viewIndex != _boardTileCount - 1)
               Center(
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Color(0xffC4DFDF).withOpacity(0.2),
-                    BlendMode.srcATop,
-                  ),
-                  child: Image.asset(imagePaths[viewIndex]),
-                ),
+                child: Image.asset(imagePaths[viewIndex]),
               ),
             //Stack player widget
             for(int i=0; i<players.length; i++)...[

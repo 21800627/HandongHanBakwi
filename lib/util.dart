@@ -49,11 +49,13 @@ void showQCardOverlay(BuildContext context, model) {
             onPressed: hideQCardOverlay,
             child: const Icon(
               Icons.close,
+              color: Colors.black,
             ),
           ),
           QCard(
             koreanMessage: question['Korean'],
             englishMessage: question['English'],
+            points: question['points'],
           ),
         ],
       );
@@ -74,11 +76,12 @@ void showCHCardOverlay(BuildContext context, model) {
         children: [
           OutlinedButton(
             style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.grey,
+              backgroundColor: Colors.white,
             ),
             onPressed: hideCHCardOverlay,
             child: const Icon(
               Icons.close,
+              color: Colors.black,
             ),
           ),
           CHCard(message: chcq.getRandomCHC(),),
@@ -112,6 +115,7 @@ void ShowGameOverOverlay(BuildContext context) {
             onPressed: hideGameOverOverlay,
             child: const Icon(
               Icons.close,
+              //color: Colors.black,
             ),
           ),
           Text('Game Over', style: Theme.of(context).textTheme.headline1,)

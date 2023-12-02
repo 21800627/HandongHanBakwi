@@ -40,7 +40,7 @@ class _CHCardState extends State<CHCard> {
 
   Widget _buildMainCard(BuildContext context) {
     String mainCardText =
-    clickedCardIndex != -1 ? '축하합니다' : '카드를 선택해주세요';
+    clickedCardIndex != -1 ? 'Congratulations' : 'Please select a card';
     //clickedCardIndex != -1 ? widget.message : '카드를 선택해주세요';
 
     return GestureDetector(
@@ -52,10 +52,14 @@ class _CHCardState extends State<CHCard> {
         }
       },
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.8,
+        width: MediaQuery.of(context).size.width * 0.5,
+        height: MediaQuery.of(context).size.height * 0.6,
 
         decoration: BoxDecoration(
+          // image: DecorationImage(
+          //   image: AssetImage('assets/images/Qback.png'),
+          //   fit: BoxFit.fill,
+          // ),
           color: Colors.white,
           boxShadow: [
             BoxShadow(

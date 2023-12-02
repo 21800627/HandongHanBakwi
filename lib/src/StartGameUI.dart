@@ -189,11 +189,13 @@ class StartGamePage extends StatelessWidget {
                   GestureDetector(
                       onTap: ()async{
                         if(appState.isTurn){
-                          await diceKey.currentState?.rollDice().then((value) {
+                          await diceKey.currentState?.rollDice().then((value) async {
 
                             appState.updateDiceValue(value).then((value) =>
                                 appState.setCurrentPlayer()
                             );
+                            // 캐릭터 이동 1초 후 카드 팝업
+                            await Future.delayed(Duration(seconds: 1));
                             //_addPlayerSteps();
                             showQCardOverlay(context, appState);
 

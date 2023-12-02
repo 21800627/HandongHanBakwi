@@ -269,3 +269,6 @@ class Question {
 
 Question question = Question();
 Map<String, dynamic> randomQuestion = question.getRandomQuestion();
+
+Question randomPoints = Question();
+Map<String, dynamic> points = randomPoints.getRandomQuestion();

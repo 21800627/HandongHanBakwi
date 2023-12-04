@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 
+import '../models/QUESTION.dart';
+
+
 class QCard extends StatelessWidget {
   String koreanMessage;
   String englishMessage;
+  int points;
 
-  QCard({super.key, required this.koreanMessage, required this.englishMessage});
+  QCard({super.key, required this.koreanMessage, required this.englishMessage, required this.points});
 
   @override
   Widget build(BuildContext context) {
     double cardWidth = MediaQuery.of(context).size.width * 0.5;
-    double cardHeight = MediaQuery.of(context).size.height * 0.35;
+    double cardHeight = MediaQuery.of(context).size.height * 0.6;
 
     return Card(
       elevation: 0.0,
@@ -27,28 +31,21 @@ class QCard extends StatelessWidget {
             front: Container(
               width: cardWidth,
               height: cardHeight,
-              padding: EdgeInsets.all(20),
-
+              padding: EdgeInsets.all(25),
 
               decoration: BoxDecoration(
-
                 image: DecorationImage(
                   image: AssetImage('assets/images/Qback.png'),
                   fit: BoxFit.fill,
                 ),
-
                 //color: Colors.blue,
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
               ),
 
-
               child: Center(
                 child: Text(
-                  // Display either Korean or English message based on user preference
-                  // For example, you can check a language variable and show the corresponding message
-                  // This is just a placeholder, adjust according to your actual logic
-                  "Korean Language ? ${koreanMessage} : ${englishMessage}",
-                  style: Theme.of(context).textTheme.subtitle2,
+                  "${koreanMessage} \n\n ${englishMessage}",
+                  style: Theme.of(context).textTheme.headline5,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -56,16 +53,24 @@ class QCard extends StatelessWidget {
             back: Container(
               width: cardWidth,
               height: cardHeight,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
+              padding: EdgeInsets.all(25),
 
+              decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/Qback.png'),
                   fit: BoxFit.fill,
                 ),
-
                 //color: Colors.blue,
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+              child: Center(
+                child: Text(
+                  "${points}",
+                  style: Theme.of(context).textTheme.headline1?.copyWith(
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ),

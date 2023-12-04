@@ -14,6 +14,8 @@ class StartGamePage extends StatelessWidget {
   final int _boardCol=8;
   final int _boardTileCount=40;
 
+  String question = '';
+
   StartGamePage({Key? key}) : super(key: key);
 
   List<String> imagePaths = List.generate(40, (index) => 'assets/backgrounds/${index + 1}.png');
@@ -91,6 +93,10 @@ class StartGamePage extends StatelessWidget {
               print('gameData.isOver: ${gameData.isOver}');
               if(gameData.isOver){
                 context.go('/ranking');
+              }
+
+              if(question != '' && question != gameData.korean){
+                showQCardOverlay(context, gameData.korean, gameData.english);
               }
 
               for (int i=0; i<players.length; i++) {

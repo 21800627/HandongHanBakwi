@@ -7,9 +7,8 @@ import '../models/QUESTION.dart';
 class QCard extends StatelessWidget {
   String koreanMessage;
   String englishMessage;
-  int points;
 
-  QCard({super.key, required this.koreanMessage, required this.englishMessage, required this.points});
+  QCard({super.key, required this.koreanMessage, required this.englishMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -62,15 +61,6 @@ class QCard extends StatelessWidget {
                 ),
                 //color: Colors.blue,
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              ),
-              child: Center(
-                child: Text(
-                  "${points}",
-                  style: Theme.of(context).textTheme.headline1?.copyWith(
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
               ),
             ),
           ),

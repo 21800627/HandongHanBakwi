@@ -1,9 +1,9 @@
 class GameRoom{
   String id = '';
   String code = '';
-
   bool isOver = false;
-  String question = '';
+  String korean = '';
+  String english = '';
   String currentPlayerId = '';
   int playerNum = 0;
   int diceValue = 0;
@@ -18,7 +18,8 @@ class GameRoom{
     required this.id,
     required this.code,
     required this.isOver,
-    required this.question,
+    required this.korean,
+    required this.english,
     required this.currentPlayerId,
     required this.playerNum,
     required this.diceValue,
@@ -32,52 +33,37 @@ class GameRoom{
       id: id,
       code: data['code'] ?? 'code data not existed..',
       isOver: data['isOver'] ?? false,
-      question: data['question'] ?? '',
+      korean: data['korean'] ?? '',
+      english: data['english'] ?? '',
       currentPlayerId: data['currentPlayerId'] ?? '',
       playerNum: data['playerNum'] ?? 1,
       diceValue: data['diceValue'] ?? 0,
       totalStep: data['totalStep'] ?? 0,
-      timestamp: DateTime.now(),
-      // timestamp: (data['timestamp']!=null)
-      //     ? DateTime.fromMicrosecondsSinceEpoch(data['timestamp'])
-      //     : DateTime.now(),
+      timestamp: (data['timestamp']!=null)
+          ? DateTime.fromMicrosecondsSinceEpoch(data['timestamp'])
+          : DateTime.now(),
     );
   }
   Map<String, dynamic> toMap() {
     return {
       'code': code,
       'isOver': isOver,
-      'question': question,
+      'korean': korean,
+      'english': english,
       'currentPlayerId': currentPlayerId,
       'playerNum': playerNum,
       'diceValue': diceValue,
       'totalStep': totalStep,
-      'timestamp': timestamp,
+      'timestamp': timestamp.millisecondsSinceEpoch,
     };
-  }
-  bool isGameOver(){
-    return players.isNotEmpty && players.indexWhere((p) => p.step>40) != -1;
-  }
-
-  void setDiceValue(int value){
-    diceValue = value;
-  }
-
-  void setQuestion(String msg){
-    question = msg;
-  }
-
-  String getQuestion(){
-    return question;
   }
 }
 
 class Player{
   String id='';
   String name='';
-  bool ready = false;
+  bool isReady = false;
   bool isHost = false;
-  bool isOver = false;
   int step = 0;
   DateTime timestamp;
 
@@ -87,9 +73,8 @@ class Player{
   Player({
     required this.id,
     required this.name,
-    required this.ready,
+    required this.isReady,
     required this.isHost,
-    required this.isOver,
     required this.step,
     required this.timestamp,
   });
@@ -100,9 +85,8 @@ class Player{
     return Player(
       id: id,
       name: data['name'] ?? 'name data not existed..',
-      ready: data['ready'] ?? false,
+      isReady: data['isReady'] ?? false,
       isHost: data['isHost'] ?? false,
-      isOver: data['isOver'] ?? false,
       step: data['step'] ?? 0,
       timestamp: (data['timestamp']!=null)
           ? DateTime.fromMicrosecondsSinceEpoch(data['timestamp'])
@@ -112,11 +96,9 @@ class Player{
   Map<String, dynamic> toMap() {
     return {
       'name': name,
-      'ready': ready,
-      'isHost': isHost,
-      'isOver': isOver,
+      'isReady': isReady,
       'step': step,
-      'timestamp': timestamp,
+      'timestamp': timestamp.microsecondsSinceEpoch,
     };
   }
 }

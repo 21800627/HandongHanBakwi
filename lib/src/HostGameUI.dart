@@ -62,7 +62,7 @@ class HostGamePage extends StatelessWidget {
 
                           appState.createGame(code, num).then((hostKey) =>
                             appState.createPlayer(hostKey).then((value) =>
-                                context.go('/waiting-room/$hostKey')
+                                context.go('/waiting-room')
                             )
                           );
                         },

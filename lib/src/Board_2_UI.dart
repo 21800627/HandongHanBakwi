@@ -77,7 +77,7 @@ class Board_2_Screen extends StatelessWidget{
         model.addPlayerSteps(value);
         model.setCurrentPlayerIndex();
 
-        showQCardOverlay(context, model);
+        //showQCardOverlay(context, model);
       });
     } else{
       //ShowGameOverOverlay(context);
@@ -198,7 +198,7 @@ class Board_2_Screen extends StatelessWidget{
                   if(index== game.players.length){
                     return ElevatedButton(
                         onPressed: () {
-                          showQCardOverlay(context, game);
+                          //showQCardOverlay(context, game);
                         },
                         child: const Text('Show Q-Card'));
                   }

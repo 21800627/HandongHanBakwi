@@ -34,8 +34,7 @@ OverlayEntry? _chcard_overlayEntry;
 
 
 
-void showQCardOverlay(BuildContext context, model) {
-  final question = Question().getRandomQuestion();
+void showQCardOverlay(BuildContext context, String korean, String english) {
   assert(_qcard_overlayEntry == null);
   _qcard_overlayEntry = OverlayEntry(
     builder: (BuildContext context) {
@@ -52,8 +51,8 @@ void showQCardOverlay(BuildContext context, model) {
             ),
           ),
           QCard(
-            koreanMessage: question['Korean'],
-            englishMessage: question['English'],
+            koreanMessage: korean,
+            englishMessage: english,
           ),
         ],
       );

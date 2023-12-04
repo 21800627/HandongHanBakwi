@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,7 +15,9 @@ class RankingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ApplicationState>(
         builder: (context, appState, _){
-          Player winner = appState.playerList.firstWhere((element) => element.isOver);
+
+          Player winner = appState.getWinnerPlayer();
+
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

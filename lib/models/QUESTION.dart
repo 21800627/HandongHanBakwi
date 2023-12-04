@@ -2,8 +2,6 @@
 import 'dart:math';
 
 class Question {
-
-
     List<String> korean = [
       "드라마 or 영화",
       "갤러리의 첫 번째 사진 공유하기",
@@ -252,12 +250,22 @@ class Question {
       "What do you think life would be like without the internet?"
     ];
 
+    Set<int> generatedNumber = <int>{};
+
     Map<String, dynamic> getRandomQuestion() {
-      final int randomIndex = Random().nextInt(korean.length);
+      int randomIndex = 0;
+      while (true) {
+        int r = Random().nextInt(korean.length);
+        if (!generatedNumber.contains(r)) {
+          generatedNumber.add(r);
+          randomIndex = r;
+          break;
+        }
+      }
 
       final Map<String, dynamic> question = {
-        'Korean': korean[randomIndex],
-        'English': english[randomIndex],
+        'korean': korean[randomIndex],
+        'english': english[randomIndex],
       };
 
       final int randomPoints = Random().nextInt(71) + 30;
@@ -266,6 +274,3 @@ class Question {
       return question;
     }
   }
-
-Question question = Question();
-Map<String, dynamic> randomQuestion = question.getRandomQuestion();

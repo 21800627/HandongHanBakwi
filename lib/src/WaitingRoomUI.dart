@@ -84,7 +84,7 @@ class WaitingRoomPage extends StatelessWidget {
                                   Container(
                                       child: Text('${players[i].name}',textAlign: TextAlign.center,)
                                   ),
-                                  players[i].ready ?
+                                  players[i].isReady ?
                                   Container(
                                     padding: EdgeInsets.only(left: 10.0),
                                     child: Icon(
@@ -105,7 +105,8 @@ class WaitingRoomPage extends StatelessWidget {
                               ),
                             )
                           );
-                        }else{
+                        }
+                        else{
                           tileList.add(
                               ListTile(
                                 selected: true,
@@ -130,7 +131,7 @@ class WaitingRoomPage extends StatelessWidget {
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width * 0.25,
                   child: OutlinedButton(
-                      onPressed: () {
+                      onPressed: () async{
                         appState.startGameRoom();
                       },
                       child: const Text('Start')
@@ -143,10 +144,10 @@ class WaitingRoomPage extends StatelessWidget {
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width * 0.25,
                   child: OutlinedButton(
-                    onPressed: () {
+                    onPressed: () async{
                       appState.updatePlayerReady();
                     },
-                    child: Text('Not to be played'),
+                    child: appState.isReady() ? Text('Not to be played') : Text('Ready'),
                   ),
                 ),
               ),

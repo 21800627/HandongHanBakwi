@@ -84,8 +84,8 @@ class StartGamePage extends StatelessWidget {
                 print('StartGameUI.dart 116: no data');
               }
 
-              final gameData = snapshot.data ?? GameRoom.fromRTDB(id: '', data: {});
-              final players = appState.playerList;
+              GameRoom gameData = snapshot.data ?? GameRoom.fromRTDB(id: '', data: {});
+              List<Player> players = appState.playerList;
               final tileList = <ListTile>[];
 
               print('gameData.isOver: ${gameData.isOver}');
@@ -188,15 +188,16 @@ class StartGamePage extends StatelessWidget {
                   // dice
                   GestureDetector(
                       onTap: ()async{
-                        if(appState.isTurn){
+                        if(appState.isTurn()){
                           await diceKey.currentState?.rollDice().then((value) {
 
+                            // appState.updateDiceValue(value);
                             appState.updateDiceValue(value).then((value) =>
-                                appState.setCurrentPlayer()
+                                appState.setCurrentPlayer().then((value) =>
+                                    appState.updateQuestion()
+                                )
                             );
                             //_addPlayerSteps();
-                            showQCardOverlay(context, appState);
-
                           });
                         }
                       },

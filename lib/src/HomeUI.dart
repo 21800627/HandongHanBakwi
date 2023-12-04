@@ -67,7 +67,7 @@ class HomeScreen extends StatelessWidget {
                                 onPressed: () {
                                   String hostKey = element.id;
                                   appState.createPlayer(hostKey).then((value){
-                                    context.go('/waiting-room/$hostKey');
+                                    context.go('/waiting-room');
                                   });
                                 },
                                 child: Text('room #$index ${element.code}')

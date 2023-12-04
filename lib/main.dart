@@ -120,7 +120,7 @@ final _router = GoRouter(
           },
         ),
         GoRoute(
-          path: 'waiting-room/:hostKey',
+          path: 'waiting-room',
           builder: (context, state) {
             final String hostKey = state.pathParameters['hostKey'].toString();
             return WaitingRoomPage();

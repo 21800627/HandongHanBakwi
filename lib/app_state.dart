@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
 import 'models/GAMEROOM.dart';
+import 'models/QUESTION.dart';
 
 class ApplicationState extends ChangeNotifier {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
@@ -21,14 +22,13 @@ class ApplicationState extends ChangeNotifier {
 
   bool _loggedIn = false;
   bool _isHost = false;
-  bool _isTurn = true;
 
   late GameRoom _currentGame = GameRoom.fromRTDB(id: 'default', data: {});
   late List<Player> _playerList = List.generate(0, (index) => Player.fromRTDB(data: {}));
+  Question question = Question();
 
   bool get loggedIn => _loggedIn;
   bool get isHost => _isHost;
-  bool get isTurn => _isTurn;
   get playerList => _playerList;
 
   Future<void> init() async {
@@ -64,7 +64,10 @@ class ApplicationState extends ChangeNotifier {
     });
     return streamToPublish;
   }
+
   Stream<GameRoom> searchGameInfoStream(){
+    print('====searchGameInfoStream=====');
+    print('hostkey: $_hostKey');
     final results = _database.child('games/$_hostKey').onValue;
 
     final gameStream = results.map((event){
@@ -76,7 +79,12 @@ class ApplicationState extends ChangeNotifier {
         return Player.fromRTDB(id: id, data: data);
       }).toList();
 
-      _playerList.sort((a,b)=>a.timestamp.compareTo(b.timestamp));
+      _playerList.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+      _playerList.forEach((element) {print('player: ${element.id} ${element.timestamp.toString()}');});
+
+      print('gameMap: $gameMap');
+      print('currentPlayerId : ${_currentGame.currentPlayerId}');
 
       notifyListeners(); // Notify listeners after processing the data
       return _currentGame;
@@ -86,8 +94,8 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<String> createGame(String code, int num) async{
-    final String _uid = FirebaseAuth.instance.currentUser!.uid;
-
+    print('====createGame=====');
+    print('hostkey: $_hostKey');
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
@@ -96,18 +104,20 @@ class ApplicationState extends ChangeNotifier {
 
     final gameData = {
       'code': code,
-      'currentPlayerId': '',
       'playerNum': num,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
-
     final newHostKey = _database.child('games').push().key;
 
-    final Map<String, Map> updates = {};
-    updates['/games/$newHostKey'] = gameData;
-    updates['/game-hosts/$_uid/$newHostKey'] = gameData;
+    final gameMap = GameRoom.fromRTDB(id: '', data: gameData).toMap();
 
-    _database.update(updates);
+    print('newHostKey: ${newHostKey.toString()}');
+    print('gameMap: $gameMap');
+    final Map<String, Map> updates = {};
+    updates['/games/$newHostKey'] = gameMap;
+    //updates['/game-hosts/$_uid/$newHostKey'];
+    print('updates: $updates');
+
+    await _database.update(updates);
 
     notifyListeners();
 
@@ -115,6 +125,8 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<String> createPlayer(String hostKey) async{
+    print('====createPlayer=====');
+    print('hostkey: $hostKey');
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
     if (!_loggedIn) {
@@ -123,42 +135,44 @@ class ApplicationState extends ChangeNotifier {
 
     _hostKey = hostKey;
 
-    final playerData = {
-      'name': FirebaseAuth.instance.currentUser!.displayName,
-      'isOver': false,
-      'step': 0,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
+    final data = Player.fromRTDB(id:'createPlayer', data:
+    {
+      'name': FirebaseAuth.instance.currentUser!.displayName.toString(),
+    });
 
+    print('player: ${data.toMap()}');
     final Map<String, Map> updates = {};
-    updates['/games/$hostKey/players/$_uid'] = playerData;
+    updates['/games/$hostKey/players/$_uid'] = data.toMap();
 
     //set currentGame and players
-    _database.update(updates);
+    await _database.update(updates);
 
     notifyListeners();
 
     return _uid;
   }
+
   Future<void> startGameRoom() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
     _currentGame.currentPlayerId = _uid;
 
-    final Map<String, Map> updates = {};
-    updates['/games/$_hostKey'] = _currentGame.toMap();
+    final updates = {
+      '/games/$_hostKey/currentPlayerId': _currentGame.currentPlayerId
+    };
 
     print('====startGameRoom====');
-    print('${_currentGame.toMap()}');
-    _database.update(updates);
+    print('updates: ${updates}');
+    await _database.update(updates);
 
     notifyListeners();
   }
+
   Future<void> deleteGameRoom() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-    _database.child('game-hosts/$_uid/$_hostKey').remove();
-    _database.child('games/$_hostKey').remove();
+    await _database.child('game-hosts/$_uid/$_hostKey').remove();
+    await _database.child('games/$_hostKey').remove();
 
     notifyListeners();
   }
@@ -166,106 +180,121 @@ class ApplicationState extends ChangeNotifier {
   Future<void> removePlayer() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-    _database.child('games/$_hostKey/players/$_uid').remove();
+    await _database.child('games/$_hostKey/players/$_uid').remove();
 
     notifyListeners();
   }
 
   Future<void> setCurrentPlayer() async {
-    final String _uid = FirebaseAuth.instance.currentUser!.uid;
+    print('====setCurrentPlayer=====');
 
-    Player currentPlayer =_playerList.firstWhere((el) => el.id == _currentGame.currentPlayerId);
-    int currentPlayerIndex = _playerList.indexOf(currentPlayer);
+    int index = _playerList.indexWhere((element) => element.id == _currentGame.currentPlayerId);
 
-    if(currentPlayerIndex < _playerList.length-1){
-      int index = _playerList.indexWhere((p) => !p.isOver, currentPlayerIndex);
-      if(index<0){
-        int index = _playerList.indexWhere((p) => !p.isOver);
-        currentPlayerIndex=index;
-      }
-      else if (currentPlayerIndex == index){
-        int index = _playerList.indexWhere((p) => !p.isOver, currentPlayerIndex+1);
-        currentPlayerIndex = index;
-      }else{
-        currentPlayerIndex=index;
-      }
-    }else{
-      int index = _playerList.indexWhere((p) => !p.isOver);
-      currentPlayerIndex = index;
+    if(_playerList[index].step <40){
+      int next = (index == _playerList.length) ? 0 : index++;
+      _currentGame.currentPlayerId = _playerList[next].id;
+
+      print('index: $index, next: $next');
     }
 
-    final Map<String, Map> updates = {};
-    Map<String, dynamic> data = _currentGame.toMap();
-    data['currentPlayerId'] = _playerList.elementAt(currentPlayerIndex).id;
-
-    updates['/games/$_hostKey'] = data;
-    _database.update(updates);
-
-    if(_currentGame.currentPlayerId == _uid){
-      _isTurn = true;
-    }else{
-      _isTurn = false;
-    }
+    final updates = {
+      '/games/$_hostKey/currentPlayerId': _currentGame.currentPlayerId
+    };
+    print('currentPlayerId: ${_currentGame.currentPlayerId}');
+    await _database.update(updates);
 
     notifyListeners();
   }
 
   Future<void> updateDiceValue(int dice) async {
     print('====updateDiceValue=====');
-    print('dice : $dice');
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-    // 1. update game dice value...?
-    _currentGame.diceValue = _currentGame.diceValue + dice;
-    // 2. update player step
-    if(_uid == _currentGame.currentPlayerId){
-      for (var el in _playerList) {
-        print('el.id : ${el.id}');
-        if(el.id == _uid){
-          int totalStep = el.step + dice;
-          if(totalStep>=40){
-            el.isOver = true;
-          }
-          el.step = totalStep;
-        }
-      }
-    }
-    // Convert _playerList to a map
-    Map<String, dynamic> playerMap = Map.fromEntries(
-      _playerList.map((player) => MapEntry(player.id, player.toMap())),
-    );
+    print('dice : $dice');
+    print('currentPlayerId : ${_currentGame.currentPlayerId}');
+    print('uid : ${_uid}');
 
-    // Create updates map
-    final Map<String, dynamic> updates = {'games/$_hostKey/players': playerMap};
+    // update player step
+    Player p = _playerList.firstWhere((element) => element.id == _uid);
+    int index = _playerList.indexOf(p);
+
+    int totalStep = _playerList[index].step + dice;
+
+    _playerList[index].step = totalStep;
+
+    if(totalStep >= 40){
+      _currentGame.isOver = !_currentGame.isOver;
+    }
+
+    final updates = {
+      'games/$_hostKey/players/$_uid': _playerList[index].toMap(),
+      'games/$_hostKey/isOver': _currentGame.isOver,
+    };
 
     print('updates: $updates');
-    _database.update(updates);
+    await _database.update(updates);
     notifyListeners();
   }
 
-  void updatePlayerReady() {
+  Future<void> updateQuestion() async {
+    print('====updateQuestion=====');
+    final msg = question.getRandomQuestion();
+
+    print('question : $msg');
+    _currentGame.korean = msg['korean'];
+    _currentGame.english = msg['english'];
+
+    final Map<String,dynamic> updates = {
+      'games/$_hostKey': _currentGame.toMap()
+    };
+
+    print('updates: $updates');
+    await _database.update(updates);
+    notifyListeners();
+  }
+
+  Future<void> updatePlayerReady() async{
+    print('====updatePlayerReady=====');
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
+    int index = _playerList.indexWhere((element) => element.id == _uid,);
 
-    // Find the player in _playerList or use a default player if not found
-    Player playerToUpdate = _playerList.firstWhere(
-          (element) => element.id == _uid,
-      orElse: () => Player.fromRTDB(id:'default',data: {}),
-    );
+    _playerList[index].isReady = !_playerList[index].isReady;
 
-    // Toggle the ready status
-    playerToUpdate.ready = !playerToUpdate.ready;
-
-    // Convert _playerList to a map
     Map<String, dynamic> playerMap = Map.fromEntries(
       _playerList.map((player) => MapEntry(player.id, player.toMap())),
     );
 
-    // Create updates map
     final Map<String, dynamic> updates = {'games/$_hostKey/players': playerMap};
-
-    // Update the database
-    _database.update(updates);
+    print('updates: $updates');
+    await _database.update(updates);
 
     notifyListeners();
+  }
+
+  bool isTurn(){
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
+    if(_uid == _currentGame.currentPlayerId){
+      return true;
+    }
+    return false;
+  }
+  bool isReady(){
+    print('====isReady=====');
+    if(!isHost){
+      final String _uid = FirebaseAuth.instance.currentUser!.uid;
+      Player p = _playerList.firstWhere(
+            (element) => element.id == _uid,
+        orElse: ()=> Player.fromRTDB(id:'isReady',data:{}),
+      );
+      print('player: ${p.toMap()}');
+      return p.isReady;
+    }
+    print('isReady function error...');
+    return false;
+  }
+  Player getWinnerPlayer(){
+    List<Player> players = _playerList;
+    players.sort((a, b) => b.step.compareTo(a.step));
+    return players.first;
   }
 }

@@ -28,45 +28,46 @@ void showWarningMessage(context, String title, String message){
   );
 }
 
-OverlayEntry? _qcard_overlayEntry;
 OverlayEntry? _exit_overlayEntry;
-OverlayEntry? _chcard_overlayEntry;
-
-
+OverlayEntry? chanceOverlayEntry;
+OverlayEntry? qCardOverlayEntry;
 
 void showQCardOverlay(BuildContext context, String korean, String english) {
-  assert(_qcard_overlayEntry == null);
-  _qcard_overlayEntry = OverlayEntry(
-    builder: (BuildContext context) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.white,
+  if(qCardOverlayEntry == null){
+    qCardOverlayEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+              ),
+              onPressed: hideQCardOverlay,
+              child: const Icon(
+                Icons.close,
+              ),
             ),
-            onPressed: hideQCardOverlay,
-            child: const Icon(
-              Icons.close,
+            QCard(
+              koreanMessage: korean,
+              englishMessage: english,
             ),
-          ),
-          QCard(
-            koreanMessage: korean,
-            englishMessage: english,
-          ),
-        ],
-      );
-    },
-  );
-  // Add the OverlayEntry to the Overlay.
-  Overlay.of(context)?.insert(_qcard_overlayEntry!);
+          ],
+        );
+      },
+    );
+    // Insert the OverlayEntry after the current build is complete.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Overlay.of(context).insert(qCardOverlayEntry!);
+    });
+  }
 }
 
 
 void showCHCardOverlay(BuildContext context, model) {
   final chcq = CHCQuestion();
-  assert(_chcard_overlayEntry == null);
-  _chcard_overlayEntry = OverlayEntry(
+  assert(chanceOverlayEntry == null);
+  chanceOverlayEntry = OverlayEntry(
     builder: (BuildContext context) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -86,19 +87,19 @@ void showCHCardOverlay(BuildContext context, model) {
     },
   );
   // Add the OverlayEntry to the Overlay.
-  Overlay.of(context)?.insert(_chcard_overlayEntry!);
+  Overlay.of(context).insert(chanceOverlayEntry!);
 }
 
 void hideCHCardOverlay() {
-  _chcard_overlayEntry?.remove();
-  _chcard_overlayEntry = null;
+  chanceOverlayEntry?.remove();
+  chanceOverlayEntry = null;
 }
 
 
 
 // overlay를 리턴해서 페이지내에석  삭제하는 걸로 바꾸기!!
 void ShowGameOverOverlay(BuildContext context) {
-  assert(_exit_overlayEntry == null);
+  assert(_exit_overlayEntry != null);
   _exit_overlayEntry = OverlayEntry(
     builder: (BuildContext context) {
       return Column(
@@ -119,11 +120,11 @@ void ShowGameOverOverlay(BuildContext context) {
     },
   );
   // Add the OverlayEntry to the Overlay.
-  Overlay.of(context)?.insert(_exit_overlayEntry!);
+  Overlay.of(context).insert(_exit_overlayEntry!);
 }
 void hideQCardOverlay() {
-  _qcard_overlayEntry?.remove();
-  _qcard_overlayEntry = null;
+  qCardOverlayEntry?.remove();
+  qCardOverlayEntry = null;
 }
 void hideGameOverOverlay() {
   _exit_overlayEntry?.remove();

@@ -21,9 +21,7 @@ class StartGamePage extends StatelessWidget {
   List<String> imagePaths = List.generate(40, (index) => 'assets/backgrounds/${index + 1}.png');
 
   void _exitOnPressed(context, appState){
-    hideQCardOverlay();
-    hideGameOverOverlay();
-    if(appState.isGameOver){
+    if(appState.currentGame.isOver){
       Navigator.pushNamed(context, '/');
     }else{
       showDialog(
@@ -79,6 +77,7 @@ class StartGamePage extends StatelessWidget {
         return StreamBuilder(
             stream: appState.searchGameInfoStream(),
             builder: (context, snapshot) {
+              print('getGameInfo: ${snapshot.connectionState}');
               if(snapshot.hasError){
                 print('StartGameUI.dart 113: ${snapshot.error}');
               }
@@ -86,7 +85,7 @@ class StartGamePage extends StatelessWidget {
                 print('StartGameUI.dart 116: no data');
               }
 
-              GameRoom gameData = snapshot.data ?? GameRoom.fromRTDB(id: '', data: {});
+              GameRoom gameData = snapshot.data ?? appState.currentGame;
               List<Player> players = appState.playerList;
               final tileList = <ListTile>[];
 
@@ -94,9 +93,13 @@ class StartGamePage extends StatelessWidget {
               if(gameData.isOver){
                 context.go('/ranking');
               }
-
-              if(question != '' && question != gameData.korean){
+              print('gameData.korean: $question, currentGame.korean: ${gameData.korean}');
+              if(question == gameData.korean){
+                question = gameData.korean;
+              }
+              if(question != gameData.korean){
                 showQCardOverlay(context, gameData.korean, gameData.english);
+                question = gameData.korean;
               }
 
               for (int i=0; i<players.length; i++) {
@@ -137,7 +140,6 @@ class StartGamePage extends StatelessWidget {
                     child: Center(
                       child: Builder(
                           builder: (context) {
-                            int colorValue=0;
                             int boardRow=0; //board row
                             int j=0; //calculate board tile view index
                             int viewIndex=0;

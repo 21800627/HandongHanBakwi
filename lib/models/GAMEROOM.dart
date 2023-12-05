@@ -67,9 +67,6 @@ class Player{
   int step = 0;
   DateTime timestamp;
 
-  //get id => _id;
-  //get name => _name;
-
   Player({
     required this.id,
     required this.name,
@@ -98,7 +95,7 @@ class Player{
       'name': name,
       'isReady': isReady,
       'step': step,
-      'timestamp': timestamp.microsecondsSinceEpoch,
+      'timestamp': timestamp.millisecondsSinceEpoch,
     };
   }
 }

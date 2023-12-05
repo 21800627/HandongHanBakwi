@@ -13,6 +13,9 @@ import 'models/QUESTION.dart';
 
 class ApplicationState extends ChangeNotifier {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
+  String GAME = 'game';
+  String USER = 'user';
+  String PLAYER = 'players';
 
   ApplicationState() {
     init();
@@ -29,6 +32,7 @@ class ApplicationState extends ChangeNotifier {
 
   bool get loggedIn => _loggedIn;
   bool get isHost => _isHost;
+  get currentGame => _currentGame;
   get playerList => _playerList;
 
   Future<void> init() async {
@@ -51,14 +55,18 @@ class ApplicationState extends ChangeNotifier {
 
   Stream<List<GameRoom>> getGameListStream(){
     print('====getGameStream=====');
-    final gameStream = _database.child('games').onValue;
+    final gameStream = _database.child(GAME).onValue;
 
     final streamToPublish = gameStream.map((event){
       final gameMap = event.snapshot.value as Map<String, dynamic>;
       final gameList = gameMap.entries.map((el){
         String id = el.key.toString();
         var data = el.value as Map<String, dynamic>;
-        return GameRoom.fromRTDB(id: id, data: data);
+        GameRoom gameRoom = GameRoom.fromRTDB(id: id, data: data);
+        if(_hostKey == id){
+          _currentGame = gameRoom;
+        }
+        return gameRoom;
       }).toList();
       return gameList;
     });
@@ -66,14 +74,14 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Stream<GameRoom> searchGameInfoStream(){
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
     print('====searchGameInfoStream=====');
     print('hostkey: $_hostKey');
-    final results = _database.child('games/$_hostKey').onValue;
 
-    final gameStream = results.map((event){
+    final gameStream = _database.child('$GAME/$_hostKey').onValue.map((event){
       final gameMap = event.snapshot.value as Map<String, dynamic>;
       _currentGame = GameRoom.fromRTDB(id: _hostKey, data: gameMap);
-      _playerList =  (gameMap['players'] as Map<String, dynamic>).entries.map((el){
+      _playerList =  (gameMap[PLAYER] as Map<String, dynamic>).entries.map((el){
         String id = el.key.toString();
         final data = el.value as Map<String, dynamic>;
         return Player.fromRTDB(id: id, data: data);
@@ -90,31 +98,30 @@ class ApplicationState extends ChangeNotifier {
       return _currentGame;
     });
 
+
+    // _database.child('$USER/$_uid').onValue.map((event){
+    //   final userMap = event.snapshot.value as Map<String, dynamic>;
+    //   _isHost = userMap['isHost'] ?? false;
+    // });
     return gameStream;
   }
 
   Future<String> createGame(String code, int num) async{
+    final newHostKey = _database.child(GAME).push().key;
     print('====createGame=====');
-    print('hostkey: $_hostKey');
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
 
     _isHost = true;
 
-    final gameData = {
-      'code': code,
-      'playerNum': num,
-    };
-    final newHostKey = _database.child('games').push().key;
-
-    final gameMap = GameRoom.fromRTDB(id: '', data: gameData).toMap();
+    GameRoom gameRoom = GameRoom.fromRTDB(id: '', data: {'code': code, 'playerNum': num});
 
     print('newHostKey: ${newHostKey.toString()}');
-    print('gameMap: $gameMap');
+    print('gameMap: ${gameRoom.toMap()}');
+
     final Map<String, Map> updates = {};
-    updates['/games/$newHostKey'] = gameMap;
-    //updates['/game-hosts/$_uid/$newHostKey'];
+    updates['/$GAME/$newHostKey'] = gameRoom.toMap();
     print('updates: $updates');
 
     await _database.update(updates);
@@ -140,9 +147,16 @@ class ApplicationState extends ChangeNotifier {
       'name': FirebaseAuth.instance.currentUser!.displayName.toString(),
     });
 
+    final user = {
+      'hostKey': _hostKey,
+      'isHost': _isHost,
+      'timestamp': data.timestamp.millisecondsSinceEpoch,
+    };
+
     print('player: ${data.toMap()}');
     final Map<String, Map> updates = {};
-    updates['/games/$hostKey/players/$_uid'] = data.toMap();
+    updates['/$GAME/$hostKey/$PLAYER/$_uid'] = data.toMap();
+    updates['/$USER/$_uid'] = user;
 
     //set currentGame and players
     await _database.update(updates);
@@ -158,7 +172,7 @@ class ApplicationState extends ChangeNotifier {
     _currentGame.currentPlayerId = _uid;
 
     final updates = {
-      '/games/$_hostKey/currentPlayerId': _currentGame.currentPlayerId
+      '/$GAME/$_hostKey/currentPlayerId': _currentGame.currentPlayerId
     };
 
     print('====startGameRoom====');
@@ -171,8 +185,8 @@ class ApplicationState extends ChangeNotifier {
   Future<void> deleteGameRoom() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-    await _database.child('game-hosts/$_uid/$_hostKey').remove();
-    await _database.child('games/$_hostKey').remove();
+    await _database.child('$USER/$_uid/$_hostKey').remove();
+    await _database.child('$GAME/$_hostKey').remove();
 
     notifyListeners();
   }
@@ -180,7 +194,7 @@ class ApplicationState extends ChangeNotifier {
   Future<void> removePlayer() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-    await _database.child('games/$_hostKey/players/$_uid').remove();
+    await _database.child('$GAME/$_hostKey/$PLAYER/$_uid').remove();
 
     notifyListeners();
   }
@@ -191,14 +205,17 @@ class ApplicationState extends ChangeNotifier {
     int index = _playerList.indexWhere((element) => element.id == _currentGame.currentPlayerId);
 
     if(_playerList[index].step <40){
-      int next = (index == _playerList.length) ? 0 : index++;
+      int next = 0;
+      if(index < _playerList.length){
+        next = index+1;
+      }
       _currentGame.currentPlayerId = _playerList[next].id;
 
       print('index: $index, next: $next');
     }
 
     final updates = {
-      '/games/$_hostKey/currentPlayerId': _currentGame.currentPlayerId
+      '/$GAME/$_hostKey/currentPlayerId': _currentGame.currentPlayerId
     };
     print('currentPlayerId: ${_currentGame.currentPlayerId}');
     await _database.update(updates);
@@ -227,8 +244,8 @@ class ApplicationState extends ChangeNotifier {
     }
 
     final updates = {
-      'games/$_hostKey/players/$_uid': _playerList[index].toMap(),
-      'games/$_hostKey/isOver': _currentGame.isOver,
+      '$GAME/$_hostKey/$PLAYER/$_uid': _playerList[index].toMap(),
+      '$GAME/$_hostKey/isOver': _currentGame.isOver,
     };
 
     print('updates: $updates');
@@ -245,7 +262,8 @@ class ApplicationState extends ChangeNotifier {
     _currentGame.english = msg['english'];
 
     final Map<String,dynamic> updates = {
-      'games/$_hostKey': _currentGame.toMap()
+      '$GAME/$_hostKey/korean': _currentGame.korean,
+      '$GAME/$_hostKey/english': _currentGame.english,
     };
 
     print('updates: $updates');
@@ -264,7 +282,7 @@ class ApplicationState extends ChangeNotifier {
       _playerList.map((player) => MapEntry(player.id, player.toMap())),
     );
 
-    final Map<String, dynamic> updates = {'games/$_hostKey/players': playerMap};
+    final Map<String, dynamic> updates = {'$GAME/$_hostKey/players': playerMap};
     print('updates: $updates');
     await _database.update(updates);
 

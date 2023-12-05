@@ -2,6 +2,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
@@ -15,8 +16,8 @@ class RankingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ApplicationState>(
         builder: (context, appState, _){
-
-          Player winner = appState.getWinnerPlayer();
+          List<Player> currentPlayers = appState.playerList;
+          Player winner = appState.getWinnerPlayer(currentPlayers);
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -58,14 +59,12 @@ class RankingPage extends StatelessWidget {
                       onPressed: () async {
                         if(appState.isHost){
                           appState.deleteGameRoom().then((value){
-                            Navigator.pushNamed(context, '/');
-                            Navigator.pop(context);
+                            context.go('/');
                           }
                           );
                         }else{
                           appState.removePlayer().then((value){
-                            Navigator.pushNamed(context, '/');
-                            Navigator.pop(context);
+                            context.go('/');
                           }
                           );
                         }

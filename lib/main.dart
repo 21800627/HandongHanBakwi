@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart'; // new
 import 'package:handong_han_bakwi/src/RankingUI.dart';
 import 'package:handong_han_bakwi/src/StartGameUI.dart';
+import 'package:handong_han_bakwi/src/TutorialUI.dart';
 import 'package:handong_han_bakwi/src/WaitingRoomUI.dart';
 
 import 'package:provider/provider.dart';
@@ -111,6 +112,12 @@ final _router = GoRouter(
                 }),
               ],
             );
+          },
+        ),
+        GoRoute(
+          path: 'tutorial',
+          builder: (context, state) {
+            return TutorialPage();
           },
         ),
         GoRoute(

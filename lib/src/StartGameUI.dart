@@ -21,6 +21,7 @@ class StartGamePage extends StatelessWidget {
   List<String> imagePaths = List.generate(40, (index) => 'assets/backgrounds/${index + 1}.png');
 
   void _exitOnPressed(context, appState){
+    hideQCardOverlay();
     if(appState.currentGame.isOver){
       Navigator.pushNamed(context, '/');
     }else{
@@ -74,23 +75,15 @@ class StartGamePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ApplicationState>(
         builder: (context, appState, _){
-        return StreamBuilder(
+          return StreamBuilder(
             stream: appState.searchGameInfoStream(),
-            builder: (context, snapshot) {
-              print('getGameInfo: ${snapshot.connectionState}');
-              if(snapshot.hasError){
-                print('StartGameUI.dart 113: ${snapshot.error}');
-              }
-              if(!snapshot.hasData) {
-                print('StartGameUI.dart 116: no data');
-              }
-
+            builder: (context,snapshot) {
               GameRoom gameData = snapshot.data ?? appState.currentGame;
               List<Player> players = appState.playerList;
               final tileList = <ListTile>[];
-
               print('gameData.isOver: ${gameData.isOver}');
               if(gameData.isOver){
+                hideQCardOverlay();
                 context.go('/ranking');
               }
               print('gameData.korean: $question, currentGame.korean: ${gameData.korean}');
@@ -101,7 +94,6 @@ class StartGamePage extends StatelessWidget {
                 showQCardOverlay(context, gameData.korean, gameData.english);
                 question = gameData.korean;
               }
-
               for (int i=0; i<players.length; i++) {
                 tileList.add(ListTile(
                   dense:true,
@@ -113,119 +105,118 @@ class StartGamePage extends StatelessWidget {
                   subtitle: Text('${players[i].step} steps'),
                 ));
               }
-
               return Scaffold(
                 appBar: AppBar(
-                // title: Text('Board'),
-                elevation: 0.00,
-                automaticallyImplyLeading: false, // hide back button
-                backgroundColor: Colors.transparent,
-                toolbarHeight: MediaQuery.of(context).size.height * 0.1,
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 15.0),
-                    child: ElevatedButton(
-                      onPressed: ()=>_exitOnPressed(context, appState),
-                      child: const Text('Exit'),
+                  // title: Text('Board'),
+                  elevation: 0.00,
+                  automaticallyImplyLeading: false, // hide back button
+                  backgroundColor: Colors.transparent,
+                  toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 15.0),
+                      child: ElevatedButton(
+                        onPressed: ()=>_exitOnPressed(context, appState),
+                        child: const Text('Exit'),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
                 body: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // board tile
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    child: Center(
-                      child: Builder(
-                          builder: (context) {
-                            int colorValue=0;
-                            int boardRow=0; //board row
-                            int j=0; //calculate board tile view index
-                            int viewIndex=0;
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // board tile
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: Center(
+                        child: Builder(
+                            builder: (context) {
+                              int colorValue=0;
+                              int boardRow=0; //board row
+                              int j=0; //calculate board tile view index
+                              int viewIndex=0;
 
-                            return GridView.builder(
-                              shrinkWrap: true,
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: _boardCol,
-                              ),
-                              itemCount: _boardTileCount,
-                              itemBuilder: (BuildContext context, int index){
+                              return GridView.builder(
+                                shrinkWrap: true,
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: _boardCol,
+                                ),
+                                itemCount: _boardTileCount,
+                                itemBuilder: (BuildContext context, int index){
 
-                                if(index==0 || index==_boardTileCount-1) {
-                                  colorValue = 0xffC4DFDF;
-                                } else {
-                                  colorValue=0xffD2E9E9;
-                                }
-
-                                boardRow=(index~/_boardCol)%2;
-
-                                // if row is odd
-                                if(boardRow!=0){
-                                  // first tile of the row sets j value as 9
-                                  // j value is decreasing until end of the tile
-                                  // it calculate viewIndex which shows player moves
-                                  if(index%_boardCol==0){
-                                    j=_boardCol-1;
+                                  if(index==0 || index==_boardTileCount-1) {
+                                    colorValue = 0xffC4DFDF;
+                                  } else {
+                                    colorValue=0xffD2E9E9;
                                   }
-                                  else{
-                                    j=j-2;
+
+                                  boardRow=(index~/_boardCol)%2;
+
+                                  // if row is odd
+                                  if(boardRow!=0){
+                                    // first tile of the row sets j value as 9
+                                    // j value is decreasing until end of the tile
+                                    // it calculate viewIndex which shows player moves
+                                    if(index%_boardCol==0){
+                                      j=_boardCol-1;
+                                    }
+                                    else{
+                                      j=j-2;
+                                    }
+                                    viewIndex = index +j;
+                                  }else{
+                                    viewIndex=index;
                                   }
-                                  viewIndex = index +j;
-                                }else{
-                                  viewIndex=index;
-                                }
 
-                                return Card(
-                                  shape: RoundedRectangleBorder(
+                                  return Card(
+                                    shape: RoundedRectangleBorder(
 
-                                    side: const BorderSide(width: 2.0, color: Color(0xff383838)),
-                                  ),
-                                  // padding: const EdgeInsets.all(5),
-                                  margin: const EdgeInsets.all(3),
-                                  //color: Color(colorValue),
-                                  //elevation: 2,
-                                  child: _buildTile(players, viewIndex),
-                                );
-                              },
-                            );
+                                      side: const BorderSide(width: 2.0, color: Color(0xff383838)),
+                                    ),
+                                    // padding: const EdgeInsets.all(5),
+                                    margin: const EdgeInsets.all(3),
+                                    //color: Color(colorValue),
+                                    //elevation: 2,
+                                    child: _buildTile(players, viewIndex),
+                                  );
+                                },
+                              );
+                            }
+                        ),
+                      ),
+                    ),
+                    // dice
+                    GestureDetector(
+                        onTap: ()async{
+                          if(appState.isTurn()){
+                            await diceKey.currentState?.rollDice().then((value) {
+
+                              // appState.updateDiceValue(value);
+                              appState.updateDiceValue(value).then((value) =>
+                                  appState.setCurrentPlayer().then((value) =>
+                                      appState.updateQuestion()
+                                  )
+                              );
+                              //_addPlayerSteps();
+                            });
                           }
+                        },
+                        child: Dice(key: diceKey)
+                    ),
+                    // player list
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      child: Center(
+                        child:ListView(
+                          children:tileList,
+                        ),
                       ),
                     ),
-                  ),
-                  // dice
-                  GestureDetector(
-                      onTap: ()async{
-                        if(appState.isTurn()){
-                          await diceKey.currentState?.rollDice().then((value) {
-
-                            // appState.updateDiceValue(value);
-                            appState.updateDiceValue(value).then((value) =>
-                                appState.setCurrentPlayer().then((value) =>
-                                    appState.updateQuestion()
-                                )
-                            );
-                            //_addPlayerSteps();
-                          });
-                        }
-                      },
-                      child: Dice(key: diceKey)
-                  ),
-                  // player list
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    child: Center(
-                      child:ListView(
-                        children:tileList,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-        );
+                  ],
+                ),
+              );
+            }
+          );
       }
     );
   }

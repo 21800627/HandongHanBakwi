@@ -65,6 +65,11 @@ class ApplicationState extends ChangeNotifier {
         GameRoom gameRoom = GameRoom.fromRTDB(id: id, data: data);
         if(_hostKey == id){
           _currentGame = gameRoom;
+          _playerList =  (gameMap[PLAYER] as Map<String, dynamic>).entries.map((el){
+            String id = el.key.toString();
+            final data = el.value as Map<String, dynamic>;
+            return Player.fromRTDB(id: id, data: data);
+          }).toList();
         }
         return gameRoom;
       }).toList();
@@ -194,6 +199,7 @@ class ApplicationState extends ChangeNotifier {
   Future<void> removePlayer() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
+    await _database.child('$USER/$_uid/$_hostKey').remove();
     await _database.child('$GAME/$_hostKey/$PLAYER/$_uid').remove();
 
     notifyListeners();
@@ -206,7 +212,7 @@ class ApplicationState extends ChangeNotifier {
 
     if(_playerList[index].step <40){
       int next = 0;
-      if(index < _playerList.length){
+      if(_playerList[index] != _playerList.last){
         next = index+1;
       }
       _currentGame.currentPlayerId = _playerList[next].id;
@@ -232,9 +238,7 @@ class ApplicationState extends ChangeNotifier {
     print('uid : ${_uid}');
 
     // update player step
-    Player p = _playerList.firstWhere((element) => element.id == _uid);
-    int index = _playerList.indexOf(p);
-
+    int index = _playerList.indexWhere((element) => element.id == _uid);
     int totalStep = _playerList[index].step + dice;
 
     _playerList[index].step = totalStep;
@@ -310,9 +314,8 @@ class ApplicationState extends ChangeNotifier {
     print('isReady function error...');
     return false;
   }
-  Player getWinnerPlayer(){
-    List<Player> players = _playerList;
-    players.sort((a, b) => b.step.compareTo(a.step));
-    return players.first;
+  Player getWinnerPlayer(List<Player> currentPlayers){
+    currentPlayers.sort((a, b) => b.step.compareTo(a.step));
+    return currentPlayers.first;
   }
 }

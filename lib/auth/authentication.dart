@@ -57,7 +57,7 @@ class AuthFunc extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.25,
               child: OutlinedButton(
                   onPressed: () {
-                    null;
+                    context.push('/tutorial');
                   },
                   child: const Text('Tutorial')),
             )

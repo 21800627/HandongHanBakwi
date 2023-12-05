@@ -140,6 +140,7 @@ class StartGamePage extends StatelessWidget {
                     child: Center(
                       child: Builder(
                           builder: (context) {
+                            int colorValue=0;
                             int boardRow=0; //board row
                             int j=0; //calculate board tile view index
                             int viewIndex=0;

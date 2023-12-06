@@ -54,7 +54,7 @@ class GameRoom{
       'playerNum': playerNum,
       'diceValue': diceValue,
       'totalStep': totalStep,
-      'timestamp': timestamp.millisecondsSinceEpoch,
+      'timestamp': timestamp.microsecondsSinceEpoch,
     };
   }
 }
@@ -95,7 +95,7 @@ class Player{
       'name': name,
       'isReady': isReady,
       'step': step,
-      'timestamp': timestamp.millisecondsSinceEpoch,
+      'timestamp': timestamp.microsecondsSinceEpoch,
     };
   }
 }

@@ -155,7 +155,7 @@ class ApplicationState extends ChangeNotifier {
     final user = {
       'hostKey': _hostKey,
       'isHost': _isHost,
-      'timestamp': data.timestamp.millisecondsSinceEpoch,
+      'timestamp': data.timestamp.microsecondsSinceEpoch,
     };
 
     print('player: ${data.toMap()}');

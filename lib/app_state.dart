@@ -318,4 +318,13 @@ class ApplicationState extends ChangeNotifier {
     currentPlayers.sort((a, b) => b.step.compareTo(a.step));
     return currentPlayers.first;
   }
+  Future<void> sendOpinion(String text) async {
+    final newOpinion = _database.child('text').push().key;
+    final Map<String,dynamic> updates = {};
+    updates['/text'] = {'$newOpinion': text};
+
+    print('updates: $updates');
+    await _database.update(updates);
+
+  }
 }

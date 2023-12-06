@@ -103,6 +103,8 @@ class StartGamePage extends StatelessWidget {
                   title: Text(players[i].name),
                   //subtitle: Text('show current steps'),
                   subtitle: Text('${players[i].step} steps'),
+                  selected: (players[i].id != gameData.currentPlayerId) ? false: true,
+                  selectedColor: Colors.amber,
                 ));
               }
               return Scaffold(
@@ -170,7 +172,6 @@ class StartGamePage extends StatelessWidget {
 
                                   return Card(
                                     shape: RoundedRectangleBorder(
-
                                       side: const BorderSide(width: 2.0, color: Color(0xff383838)),
                                     ),
                                     // padding: const EdgeInsets.all(5),

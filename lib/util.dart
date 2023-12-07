@@ -176,13 +176,11 @@ Future<void> exitGameRoom(context, appState) async {
   try{
     if(appState.isHost){
       appState.removeGameRoom().then((value){
-        Navigator.of(context).pop();
-        context.go('/');
+        context.pushedNamed('/');
       });
     }else{
       appState.removePlayer().then((value){
-        Navigator.of(context).pop();
-        context.go('/');
+        context.pushedNamed('/');
       });
     }
   }catch(e){

@@ -35,7 +35,7 @@ class StartGamePage extends StatelessWidget {
               print('gameData.isOver: ${gameData.isOver}');
               if(gameData.id == 'default' || gameData.isOver){
                 hideQCardOverlay();
-                context.go('/ranking');
+                context.pushNamed('/ranking');
               }
               print('gameData.korean: $question, currentGame.korean: ${gameData.korean}');
               if(question == gameData.korean){
@@ -69,7 +69,7 @@ class StartGamePage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 15.0),
                       child: ElevatedButton(
-                        onPressed: ()=>exitOnPressed(context, appState),
+                        onPressed: () => exitOnPressed(context, appState),
                         child: const Text('Exit'),
                       ),
                     ),

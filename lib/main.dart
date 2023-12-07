@@ -81,6 +81,18 @@ final _router = GoRouter(
                           content: Text(
                               'Please check your email to verify your email address'));
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      const materialBanner = MaterialBanner(
+                        content: Text('Please check your email to verify your email address'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: null,
+                            child: Text(''),
+                          ),
+                        ],
+                      );
+                      ScaffoldMessenger.of(context).showMaterialBanner(materialBanner);
+                    }else{
+                      ScaffoldMessenger.of(context).clearMaterialBanners();
                     }
                     context.pushReplacement('/');
                   }

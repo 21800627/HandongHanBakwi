@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:handong_han_bakwi/app_state.dart';
@@ -32,7 +33,7 @@ class StartGamePage extends StatelessWidget {
               List<Player> players = appState.playerList;
               final tileList = <ListTile>[];
               print('gameData.isOver: ${gameData.isOver}');
-              if(gameData.isOver){
+              if(gameData.id == 'default' || gameData.isOver){
                 hideQCardOverlay();
                 context.go('/ranking');
               }

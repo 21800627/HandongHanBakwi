@@ -46,6 +46,9 @@ class ApplicationState extends ChangeNotifier {
 
     FirebaseAuth.instance.userChanges().listen((User? user) {
       if (user != null) {
+        if (!user.isAnonymous) {
+          _loggedIn = false;
+        }
         _loggedIn = true;
       } else {
         _loggedIn = false;

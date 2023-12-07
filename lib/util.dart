@@ -124,8 +124,10 @@ void ShowGameOverOverlay(BuildContext context) {
   Overlay.of(context).insert(_exit_overlayEntry!);
 }
 void hideQCardOverlay() {
-  qCardOverlayEntry?.remove();
-  qCardOverlayEntry = null;
+  if(qCardOverlayEntry != null){
+    qCardOverlayEntry?.remove();
+    qCardOverlayEntry = null;
+  }
 }
 void hideGameOverOverlay() {
   _exit_overlayEntry?.remove();

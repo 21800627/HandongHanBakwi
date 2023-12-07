@@ -83,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                       return Expanded(
                         child: Container(
                           margin: const EdgeInsets.fromLTRB(0,0,0,40),
-                          width: MediaQuery.of(context).size.width * 0.5,
+                          width: MediaQuery.of(context).orientation == Orientation.portrait ? MediaQuery.of(context).size.width * 0.8 : MediaQuery.of(context).size.width * 0.5,
                           child: ListView(
                             shrinkWrap: true,
                             children:tileList,
@@ -94,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom:30),
+                padding: MediaQuery.of(context).orientation == Orientation.portrait ? const EdgeInsets.only(bottom:8) : const EdgeInsets.only(bottom:30),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

@@ -75,12 +75,13 @@ class StartGamePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                body: Row(
+                body: MediaQuery.of(context).orientation == Orientation.portrait
+                    ? Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     // board tile
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.6,
+                    Expanded(
+                      flex: 3,
                       child: Center(
                         child: Builder(
                             builder: (context) {
@@ -138,26 +139,126 @@ class StartGamePage extends StatelessWidget {
                       ),
                     ),
                     // dice
-                    GestureDetector(
-                        onTap: ()async{
-                          if(appState.isTurn()){
-                            await diceKey.currentState?.rollDice().then((value) {
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                          onTap: ()async{
+                            if(appState.isTurn()){
+                              await diceKey.currentState?.rollDice().then((value) {
 
-                              // appState.updateDiceValue(value);
-                              appState.updateDiceValue(value).then((value) =>
-                                  appState.setCurrentPlayer().then((value) =>
-                                      appState.updateQuestion()
-                                  )
-                              );
-                              //_addPlayerSteps();
-                            });
-                          }
-                        },
-                        child: Dice(key: diceKey)
+                                // appState.updateDiceValue(value);
+                                appState.updateDiceValue(value).then((value) =>
+                                    appState.setCurrentPlayer().then((value) =>
+                                        appState.updateQuestion()
+                                    )
+                                );
+                                //_addPlayerSteps();
+                              });
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Dice(key: diceKey),
+                          )
+                      ),
                     ),
                     // player list
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.2,
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                        child:ListView(
+                          children:tileList,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                    : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // board tile
+                    Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Builder(
+                            builder: (context) {
+                              int colorValue=0;
+                              int boardRow=0; //board row
+                              int j=0; //calculate board tile view index
+                              int viewIndex=0;
+
+                              return GridView.builder(
+                                shrinkWrap: true,
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: _boardCol,
+                                ),
+                                itemCount: _boardTileCount,
+                                itemBuilder: (BuildContext context, int index){
+
+                                  if(index==0 || index==_boardTileCount-1) {
+                                    colorValue = 0xffC4DFDF;
+                                  } else {
+                                    colorValue=0xffD2E9E9;
+                                  }
+
+                                  boardRow=(index~/_boardCol)%2;
+
+                                  // if row is odd
+                                  if(boardRow!=0){
+                                    // first tile of the row sets j value as 9
+                                    // j value is decreasing until end of the tile
+                                    // it calculate viewIndex which shows player moves
+                                    if(index%_boardCol==0){
+                                      j=_boardCol-1;
+                                    }
+                                    else{
+                                      j=j-2;
+                                    }
+                                    viewIndex = index +j;
+                                  }else{
+                                    viewIndex=index;
+                                  }
+
+                                  return Card(
+                                    shape: RoundedRectangleBorder(
+                                      side: const BorderSide(width: 2.0, color: Color(0xff383838)),
+                                    ),
+                                    // padding: const EdgeInsets.all(5),
+                                    margin: const EdgeInsets.all(3),
+                                    //color: Color(colorValue),
+                                    //elevation: 2,
+                                    child: _buildTile(players, viewIndex),
+                                  );
+                                },
+                              );
+                            }
+                        ),
+                      ),
+                    ),
+                    // dice
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                          onTap: ()async{
+                            if(appState.isTurn()){
+                              await diceKey.currentState?.rollDice().then((value) {
+
+                                // appState.updateDiceValue(value);
+                                appState.updateDiceValue(value).then((value) =>
+                                    appState.setCurrentPlayer().then((value) =>
+                                        appState.updateQuestion()
+                                    )
+                                );
+                                //_addPlayerSteps();
+                              });
+                            }
+                          },
+                          child: Dice(key: diceKey)
+                      ),
+                    ),
+                    // player list
+                    Expanded(
+                      flex: 1,
                       child: Center(
                         child:ListView(
                           children:tileList,

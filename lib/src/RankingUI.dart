@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../app_state.dart';
 import '../models/GAMEROOM.dart';
+import '../util.dart';
 
 class RankingPage extends StatelessWidget {
 
@@ -56,19 +57,7 @@ class RankingPage extends StatelessWidget {
                   margin: const EdgeInsets.all(8),
                   width: MediaQuery.of(context).size.width * 0.25,
                   child: OutlinedButton(
-                      onPressed: () async {
-                        if(appState.isHost){
-                          appState.deleteGameRoom().then((value){
-                            context.go('/');
-                          }
-                          );
-                        }else{
-                          appState.removePlayer().then((value){
-                            context.go('/');
-                          }
-                          );
-                        }
-                      },
+                      onPressed: () async => await exitGameRoom(context, appState),
                       child: const Text('Quit')
                   ),
                 ),

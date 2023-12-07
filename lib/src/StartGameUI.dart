@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:handong_han_bakwi/app_state.dart';
+import 'package:handong_han_bakwi/models/GAME.dart';
 import 'package:provider/provider.dart';
 
 import '../models/GAMEROOM.dart';
@@ -20,57 +21,6 @@ class StartGamePage extends StatelessWidget {
 
   List<String> imagePaths = List.generate(40, (index) => 'assets/backgrounds/${index + 1}.png');
 
-  void _exitOnPressed(context, appState){
-    hideQCardOverlay();
-    if(appState.currentGame.isOver){
-      Navigator.pushNamed(context, '/');
-    }else{
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Exit'),
-            content: const Text(
-              'Game is not over. Do you really want to exit game?',
-            ),
-            actions: <Widget>[
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: Theme.of(context).textTheme.labelLarge,
-                ),
-                child: const Text('Exit'),
-                onPressed: () {
-                  if(appState.isHost){
-                    appState.deleteGameRoom().then((value){
-                      context.push('/');
-                      Navigator.pop(context);
-                    }
-                    );
-                  }else{
-                    appState.removePlayer().then((value){
-                      context.push('/');
-                      Navigator.pop(context);
-                    }
-                    );
-                  }
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ApplicationState>(
@@ -78,7 +28,7 @@ class StartGamePage extends StatelessWidget {
           return StreamBuilder(
             stream: appState.searchGameInfoStream(),
             builder: (context,snapshot) {
-              GameRoom gameData = snapshot.data ?? appState.currentGame;
+              GameRoom gameData = snapshot.data ?? GameRoom.fromRTDB(id: 'default', data: {});
               List<Player> players = appState.playerList;
               final tileList = <ListTile>[];
               print('gameData.isOver: ${gameData.isOver}');
@@ -118,7 +68,7 @@ class StartGamePage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 15.0),
                       child: ElevatedButton(
-                        onPressed: ()=>_exitOnPressed(context, appState),
+                        onPressed: ()=>exitOnPressed(context, appState),
                         child: const Text('Exit'),
                       ),
                     ),

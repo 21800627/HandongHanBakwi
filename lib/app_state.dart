@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:handong_han_bakwi/models/GAME.dart';
 
 import 'firebase_options.dart';
 import 'models/GAMEROOM.dart';
@@ -55,21 +56,17 @@ class ApplicationState extends ChangeNotifier {
 
   Stream<List<GameRoom>> getGameListStream(){
     print('====getGameStream=====');
-    final gameStream = _database.child(GAME).onValue;
-
-    final streamToPublish = gameStream.map((event){
+    final streamToPublish = _database.child(GAME).onValue.map((event){
       final gameMap = event.snapshot.value as Map<String, dynamic>;
       final gameList = gameMap.entries.map((el){
         String id = el.key.toString();
-        var data = el.value as Map<String, dynamic>;
+        Map<String, dynamic> data = el.value ?? {};
+        Map<String, dynamic> playerMap = data[PLAYER] ?? {};
         GameRoom gameRoom = GameRoom.fromRTDB(id: id, data: data);
-        if(_hostKey == id){
-          _currentGame = gameRoom;
-          _playerList =  (gameMap[PLAYER] as Map<String, dynamic>).entries.map((el){
-            String id = el.key.toString();
-            final data = el.value as Map<String, dynamic>;
-            return Player.fromRTDB(id: id, data: data);
-          }).toList();
+        print('$data');
+        print('playerlength: ${playerMap.entries.length}');
+        if(playerMap.length == gameRoom.playerNum){
+          return GameRoom.fromRTDB(id: '#waiting_for_start#', data: data);
         }
         return gameRoom;
       }).toList();
@@ -82,7 +79,7 @@ class ApplicationState extends ChangeNotifier {
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
     print('====searchGameInfoStream=====');
     print('hostkey: $_hostKey');
-
+    _currentGame = GameRoom.fromRTDB(id: 'searchGameInfoStream', data: {});
     final gameStream = _database.child('$GAME/$_hostKey').onValue.map((event){
       final gameMap = event.snapshot.value as Map<String, dynamic>;
       _currentGame = GameRoom.fromRTDB(id: _hostKey, data: gameMap);
@@ -102,12 +99,6 @@ class ApplicationState extends ChangeNotifier {
       notifyListeners(); // Notify listeners after processing the data
       return _currentGame;
     });
-
-
-    // _database.child('$USER/$_uid').onValue.map((event){
-    //   final userMap = event.snapshot.value as Map<String, dynamic>;
-    //   _isHost = userMap['isHost'] ?? false;
-    // });
     return gameStream;
   }
 
@@ -187,7 +178,7 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteGameRoom() async{
+  Future<void> removeGameRoom() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
     await _database.child('$USER/$_uid/$_hostKey').remove();

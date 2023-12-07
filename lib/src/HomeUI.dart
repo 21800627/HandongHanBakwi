@@ -11,6 +11,7 @@ import '../auth/authentication.dart';
 import '../models/GAMEROOM.dart';
 
 class HomeScreen extends StatelessWidget {
+
   const HomeScreen({super.key});
 
   @override
@@ -22,6 +23,7 @@ class HomeScreen extends StatelessWidget {
       body: Consumer<ApplicationState>(
         builder: (context, appState, _){
           print('appState loggedIn: ${appState.loggedIn}');
+          List<GameRoom> games = [];
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -52,26 +54,29 @@ class HomeScreen extends StatelessWidget {
                     stream: appState.getGameListStream(),
                     builder: (context, snapshot) {
                       final tileList = <ListTile>[];
-                      print('getGameStream: ${snapshot.connectionState}');
                       if(snapshot.hasError){
                         print('getGameStream: ${snapshot.error}');
                         print('getGameStream: ${snapshot.data}');
                       }
+                      print('getGameStream: ${snapshot.connectionState}');
                       if(snapshot.hasData){
+                        if(snapshot.connectionState == ConnectionState.active){
+                          games = snapshot.data!;
+                        }
                         int index = 0;
-                        final List<GameRoom> games = snapshot.data ?? [];
                         games?.forEach((element) {
                           index++;
                           tileList.add(ListTile(
-                            title: TextButton(
-                                onPressed: () {
-                                  String hostKey = element.id;
-                                  appState.createPlayer(hostKey).then((value){
-                                    context.go('/waiting-room');
-                                  });
-                                },
-                                child: Text('room #$index ${element.code}')
-                            ),
+                            title: Center(child: Text('room #$index ${(element.id == '#waiting_for_start#') ? 'waiting for start..' : '${element.code}'}')),
+                            selected: (element.id == '#waiting_for_start#') ? true : false,
+                              textColor: Colors.deepPurple,
+                            selectedColor: Colors.grey,
+                            onTap: (){
+                              String hostKey = element.id;
+                              appState.createPlayer(hostKey).then((value){
+                                context.go('/waiting-room');
+                              });
+                            }
                           ));
                         });
                       }

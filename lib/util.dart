@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:handong_han_bakwi/widgets/QCard.dart';
 import 'package:handong_han_bakwi/widgets/CHCard.dart';
 
@@ -129,4 +130,61 @@ void hideQCardOverlay() {
 void hideGameOverOverlay() {
   _exit_overlayEntry?.remove();
   _exit_overlayEntry = null;
+}
+void exitOnPressed(context, appState){
+  hideQCardOverlay();
+  // if(appState.currentGame.isOver){
+  //   _exitGameRoom(context, appState);
+  //   context.go('/');
+  //   return;
+  // }
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Exit'),
+        content: const Text(
+          'Do you really want to exit game?',
+        ),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Exit'),
+            onPressed: () async{
+              await exitGameRoom(context, appState);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+Future<void> exitGameRoom(context, appState) async {
+  try{
+    if(appState.isHost){
+      appState.removeGameRoom().then((value){
+        Navigator.of(context).pop();
+        context.go('/');
+      });
+    }else{
+      appState.removePlayer().then((value){
+        Navigator.of(context).pop();
+        context.go('/');
+      });
+    }
+  }catch(e){
+    print('====exitGameRoom====');
+    print(e);
+  }
 }

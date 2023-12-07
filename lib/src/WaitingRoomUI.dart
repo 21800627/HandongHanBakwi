@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:handong_han_bakwi/models/GAME.dart';
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
 import '../models/GAMEROOM.dart';
+import '../util.dart';
 
 class WaitingRoomPage extends StatelessWidget {
 
@@ -18,17 +20,7 @@ class WaitingRoomPage extends StatelessWidget {
             title: const Text('Waiting Room'),
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                if(appState.isHost){
-                  appState.deleteGameRoom().then((value) =>
-                    Navigator.pop(context)
-                  );
-                }else{
-                  appState.removePlayer().then((value) =>
-                      Navigator.pop(context)
-                  );
-                }
-              },
+              onPressed: () => exitOnPressed(context, appState),
             ),
           ),
           body: Column(
@@ -38,15 +30,19 @@ class WaitingRoomPage extends StatelessWidget {
                   stream: appState.searchGameInfoStream(),
                   builder: (context, snapshot) {
                     final tileList = <ListTile>[];
-
                     if(snapshot.hasError){
                       print('HostGameUI.dart 41: ${snapshot.error}');
+                      context.go('/');
                     }
                     if(snapshot.hasData){
                       List<Player> players = appState.playerList;
+                      final gameData = snapshot.data ?? GameRoom.fromRTDB(id: 'default', data: {});
                       final int playerNum = snapshot.data?.playerNum ?? 0;
 
-                      if(snapshot.data?.currentPlayerId != ''){
+                      if(gameData.id == 'default' || gameData.playerNum == 0){
+                        context.go('/');
+                      }
+                      if(gameData.currentPlayerId != ''){
                         context.go('/start-game');
                       }
 

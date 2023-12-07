@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../app_state.dart';
+import '../util.dart';
 
 class HostGamePage extends StatelessWidget {
 
@@ -13,20 +14,20 @@ class HostGamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Host Game'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Consumer<ApplicationState>(
-            builder: (context, appState, _) {
-              return Column(
+    return Consumer<ApplicationState>(
+        builder: (context, appState, _) {
+          return Scaffold(
+          appBar: AppBar(
+            title: const Text('Host Game'),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () => exitOnPressed(context, appState),
+            ),
+          ),
+          body: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
@@ -61,20 +62,20 @@ class HostGamePage extends StatelessWidget {
                           var num = int.parse(numberController.text);
 
                           appState.createGame(code, num).then((hostKey) =>
-                            appState.createPlayer(hostKey).then((value) =>
-                                context.go('/waiting-room')
-                            )
+                              appState.createPlayer(hostKey).then((value) =>
+                                  context.go('/waiting-room')
+                              )
                           );
                         },
                         child: const Text('Confirm')
                     ),
                   ),
                 ],
-              );
-            }
+              )
+            ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 }

@@ -28,7 +28,7 @@ class WaitingRoomPage extends StatelessWidget {
             children: [
               StreamBuilder(
                   stream: appState.searchGameInfoStream(),
-                  builder: (context, snapshot) {
+                  builder: (BuildContext context, snapshot) {
                     final tileList = <ListTile>[];
                     if(snapshot.hasError){
                       print('HostGameUI.dart 41: ${snapshot.error}');

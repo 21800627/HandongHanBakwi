@@ -11,6 +11,8 @@ class HostGamePage extends StatelessWidget {
 
   final codeController = TextEditingController();
   final numberController = TextEditingController();
+  final timeController = TextEditingController();
+  final List<int> timeList = List.generate(6, (i)=> 10*(i+1));
 
   @override
   Widget build(BuildContext context) {
@@ -53,15 +55,29 @@ class HostGamePage extends StatelessWidget {
                       controller: numberController,
                     ),
                   ),
+                  Row(
+                    children: [
+                      Text('Estimated Time: '),
+                      DropdownMenu<int>(
+                        initialSelection: timeList.first,
+                        controller: timeController,
+                        label: const Text('minutes'),
+                        dropdownMenuEntries: timeList.map<DropdownMenuEntry<int>>((int time) =>
+                            DropdownMenuEntry<int>(value: time, label: time.toString())
+                        ).toList(),
+                      ),
+                    ],
+                  ),
                   Container(
-                    margin: const EdgeInsets.all(8),
+                    margin: const EdgeInsets.only(top: 30),
                     width: MediaQuery.of(context).size.width * 0.25,
                     child: OutlinedButton(
                         onPressed: () {
                           var code = codeController.text;
                           var num = int.parse(numberController.text);
+                          var time = int.parse(timeController.text);
 
-                          appState.createGame(code, num).then((hostKey) =>
+                          appState.createGame(code, num, time).then((hostKey) =>
                               appState.createPlayer(hostKey).then((value) =>
                                   context.go('/waiting-room')
                               )

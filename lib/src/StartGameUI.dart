@@ -28,14 +28,14 @@ class StartGamePage extends StatelessWidget {
         builder: (context, appState, _){
           return StreamBuilder(
             stream: appState.searchGameInfoStream(),
-            builder: (context,snapshot) {
+            builder: (BuildContext context,snapshot) {
               GameRoom gameData = snapshot.data ?? GameRoom.fromRTDB(id: 'default', data: {});
               List<Player> players = appState.playerList;
               final tileList = <ListTile>[];
               print('gameData.isOver: ${gameData.isOver}');
               if(gameData.id == 'default' || gameData.isOver){
                 hideQCardOverlay();
-                context.pushNamed('/ranking');
+                context.go('/ranking');
               }
               print('gameData.korean: $question, currentGame.korean: ${gameData.korean}');
               if(question == gameData.korean){
@@ -75,11 +75,19 @@ class StartGamePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                body: MediaQuery.of(context).orientation == Orientation.portrait
-                    ? Column(
+                body: MediaQuery.of(context).orientation == Orientation.portrait ?
+                Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     // board tile
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                        child:ListView(
+                          children:tileList,
+                        ),
+                      ),
+                    ),
                     Expanded(
                       flex: 3,
                       child: Center(
@@ -163,14 +171,6 @@ class StartGamePage extends StatelessWidget {
                       ),
                     ),
                     // player list
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child:ListView(
-                          children:tileList,
-                        ),
-                      ),
-                    ),
                   ],
                 )
                     : Row(

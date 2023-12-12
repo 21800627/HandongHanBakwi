@@ -135,11 +135,6 @@ void hideGameOverOverlay() {
 }
 void exitOnPressed(context, appState){
   hideQCardOverlay();
-  // if(appState.currentGame.isOver){
-  //   _exitGameRoom(context, appState);
-  //   context.go('/');
-  //   return;
-  // }
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -172,15 +167,15 @@ void exitOnPressed(context, appState){
     },
   );
 }
-Future<void> exitGameRoom(context, appState) async {
+Future<void> exitGameRoom(BuildContext context, appState) async {
   try{
     if(appState.isHost){
       appState.removeGameRoom().then((value){
-        context.pushedNamed('/');
+        context.go('/');
       });
     }else{
       appState.removePlayer().then((value){
-        context.pushedNamed('/');
+        context.go('/');
       });
     }
   }catch(e){

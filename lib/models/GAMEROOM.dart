@@ -5,6 +5,7 @@ class GameRoom{
   String korean = '';
   String english = '';
   String currentPlayerId = '';
+  int QNum = 0;
   int playerNum = 0;
   int diceValue = 0;
   int totalStep = 40;
@@ -22,6 +23,7 @@ class GameRoom{
     required this.english,
     required this.currentPlayerId,
     required this.playerNum,
+    required this.QNum,
     required this.diceValue,
     required this.totalStep,
     //required this.players,
@@ -36,6 +38,7 @@ class GameRoom{
       korean: data['korean'] ?? '',
       english: data['english'] ?? '',
       currentPlayerId: data['currentPlayerId'] ?? '',
+      QNum: data['QNum'] ?? 1,
       playerNum: data['playerNum'] ?? 1,
       diceValue: data['diceValue'] ?? 0,
       totalStep: data['totalStep'] ?? 0,
@@ -51,6 +54,7 @@ class GameRoom{
       'korean': korean,
       'english': english,
       'currentPlayerId': currentPlayerId,
+      'QNum': QNum,
       'playerNum': playerNum,
       'diceValue': diceValue,
       'totalStep': totalStep,
@@ -64,6 +68,7 @@ class Player{
   String name='';
   bool isReady = false;
   bool isHost = false;
+  int answeredQNum = 0;
   int step = 0;
   DateTime timestamp;
 
@@ -72,6 +77,7 @@ class Player{
     required this.name,
     required this.isReady,
     required this.isHost,
+    required this.answeredQNum,
     required this.step,
     required this.timestamp,
   });
@@ -84,6 +90,7 @@ class Player{
       name: data['name'] ?? 'name data not existed..',
       isReady: data['isReady'] ?? false,
       isHost: data['isHost'] ?? false,
+      answeredQNum: data['answeredQNum'] ?? 0,
       step: data['step'] ?? 0,
       timestamp: (data['timestamp']!=null)
           ? DateTime.fromMicrosecondsSinceEpoch(data['timestamp'])

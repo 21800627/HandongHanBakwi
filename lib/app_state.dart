@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart'
     hide EmailAuthProvider;
@@ -88,13 +89,13 @@ class ApplicationState extends ChangeNotifier {
       _currentGame = GameRoom.fromRTDB(id: _hostKey, data: gameMap);
       _playerList =  (gameMap[PLAYER] as Map<String, dynamic>).entries.map((el){
         String id = el.key.toString();
-        final data = el.value as Map<String, dynamic>;
+        Map<String, dynamic> data = el.value ?? {};
         return Player.fromRTDB(id: id, data: data);
       }).toList();
 
       _playerList.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
       _playerList.forEach((element) {print('player: ${element.id} ${element.timestamp.toString()}');});
+
 
       print('gameMap: $gameMap');
       print('currentPlayerId : ${_currentGame.currentPlayerId}');
@@ -102,10 +103,14 @@ class ApplicationState extends ChangeNotifier {
       notifyListeners(); // Notify listeners after processing the data
       return _currentGame;
     });
+    final userStream = _database.child('$USER/$_uid').onValue.map((event){
+      final userMap = event.snapshot.value as Map<String, dynamic>;
+      _isHost = userMap['isHost'] ?? false;
+    });
     return gameStream;
   }
 
-  Future<String> createGame(String code, int num) async{
+  Future<String> createGame(String code, int num, int time) async{
     final newHostKey = _database.child(GAME).push().key;
     print('====createGame=====');
     if (!_loggedIn) {
@@ -114,7 +119,9 @@ class ApplicationState extends ChangeNotifier {
 
     _isHost = true;
 
-    GameRoom gameRoom = GameRoom.fromRTDB(id: '', data: {'code': code, 'playerNum': num});
+    int QNum = time~/num;
+
+    GameRoom gameRoom = GameRoom.fromRTDB(id: '', data: {'code': code, 'playerNum': num, 'QNum': QNum});
 
     print('newHostKey: ${newHostKey.toString()}');
     print('gameMap: ${gameRoom.toMap()}');
@@ -158,7 +165,11 @@ class ApplicationState extends ChangeNotifier {
     updates['/$USER/$_uid'] = user;
 
     //set currentGame and players
-    await _database.update(updates);
+    try{
+      await _database.update(updates);
+    }catch(e){
+      print(e);
+    }
 
     notifyListeners();
 
@@ -176,7 +187,11 @@ class ApplicationState extends ChangeNotifier {
 
     print('====startGameRoom====');
     print('updates: ${updates}');
-    await _database.update(updates);
+    try{
+      await _database.update(updates);
+    }catch(e){
+      print(e);
+    }
 
     notifyListeners();
   }
@@ -218,7 +233,11 @@ class ApplicationState extends ChangeNotifier {
       '/$GAME/$_hostKey/currentPlayerId': _currentGame.currentPlayerId
     };
     print('currentPlayerId: ${_currentGame.currentPlayerId}');
-    await _database.update(updates);
+    try{
+      await _database.update(updates);
+    }catch(e){
+      print(e);
+    }
 
     notifyListeners();
   }
@@ -247,12 +266,31 @@ class ApplicationState extends ChangeNotifier {
     };
 
     print('updates: $updates');
-    await _database.update(updates);
+    try{
+      await _database.update(updates);
+    }catch(e){
+      print(e);
+    }
     notifyListeners();
   }
 
-  Future<void> updateQuestion() async {
+  Future<bool> updateQuestion() async {
     print('====updateQuestion=====');
+    // 1. calculate show Question or not
+    int index = _playerList.indexWhere((element) => element.id == _currentGame.currentPlayerId);
+    double random = Random().nextDouble();
+    double property = (_currentGame.QNum - _playerList[index].answeredQNum)/(40-_playerList[index].step);
+    print('random: $random, property: $property');
+
+    bool showQ = (random*property >= 0.5 * property) ? true : false;
+
+    if(!showQ){
+      return true;
+    }else{
+      _playerList[index].answeredQNum++;
+    }
+
+    // 2. get Question message
     final msg = question.getRandomQuestion();
 
     print('question : $msg');
@@ -265,8 +303,13 @@ class ApplicationState extends ChangeNotifier {
     };
 
     print('updates: $updates');
-    await _database.update(updates);
+    try{
+      await _database.update(updates);
+    }catch(e){
+      print(e);
+    }
     notifyListeners();
+    return false;
   }
 
   Future<void> updatePlayerReady() async{
@@ -282,7 +325,11 @@ class ApplicationState extends ChangeNotifier {
 
     final Map<String, dynamic> updates = {'$GAME/$_hostKey/players': playerMap};
     print('updates: $updates');
-    await _database.update(updates);
+    try{
+      await _database.update(updates);
+    }catch(e){
+      print(e);
+    }
 
     notifyListeners();
   }
@@ -318,7 +365,11 @@ class ApplicationState extends ChangeNotifier {
     updates['/text'] = {'$newOpinion': text};
 
     print('updates: $updates');
-    await _database.update(updates);
+    try{
+      await _database.update(updates);
+    }catch(e){
+      print(e);
+    }
 
   }
 }

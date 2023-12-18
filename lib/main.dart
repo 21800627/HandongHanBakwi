@@ -45,6 +45,7 @@ void main() async {
 }
 
 final _router = GoRouter(
+  errorBuilder: (context, state) => Center(child: Text('${state.error}')),
   routes: [
     GoRoute(
       path: '/',

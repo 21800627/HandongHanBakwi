@@ -33,9 +33,10 @@ class StartGamePage extends StatelessWidget {
               List<Player> players = appState.playerList;
               final tileList = <ListTile>[];
               print('gameData.isOver: ${gameData.isOver}');
-              if(gameData.id == 'default' || gameData.isOver){
+              if(gameData.isOver){
                 hideQCardOverlay();
                 context.go('/ranking');
+                // GoRouter.of(context).go('/ranking');
               }
               print('gameData.korean: $question, currentGame.korean: ${gameData.korean}');
               if(question == gameData.korean){

@@ -68,14 +68,15 @@ class HomeScreen extends StatelessWidget {
                           index++;
                           tileList.add(ListTile(
                             title: Center(child: Text('room #$index ${(element.id == '#waiting_for_start#') ? 'waiting for start..' : '${element.code}'}')),
-                            selected: (element.id == '#waiting_for_start#') ? true : false,
-                              textColor: Colors.deepPurple,
+                            selected: (element.id == '#waiting_for_start#') ? true : false, textColor: Colors.deepPurple,
                             selectedColor: Colors.grey,
-                            onTap: (){
-                              String hostKey = element.id;
-                              appState.createPlayer(hostKey).then((value){
-                                context.go('/waiting-room');
-                              });
+                            onTap: ()async{
+                              if(!(element.id == '#waiting_for_start#')){
+                                String hostKey = element.id;
+                                await appState.createPlayer(hostKey).then((value){
+                                  context.go('/waiting-room');
+                                });
+                              }
                             }
                           ));
                         });

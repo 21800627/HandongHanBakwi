@@ -28,7 +28,7 @@ class ApplicationState extends ChangeNotifier {
   bool _loggedIn = false;
   bool _isHost = false;
 
-  late GameRoom _currentGame = GameRoom.fromRTDB(id: 'default', data: {});
+  late GameRoom _currentGame = GameRoom.fromRTDB(id: 'initial', data: {});
   late List<Player> _playerList = List.generate(0, (index) => Player.fromRTDB(data: {}));
   Question question = Question();
 
@@ -83,41 +83,65 @@ class ApplicationState extends ChangeNotifier {
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
     print('====searchGameInfoStream=====');
     print('hostkey: $_hostKey');
-    _currentGame = GameRoom.fromRTDB(id: 'searchGameInfoStream', data: {});
-    final gameStream = _database.child('$GAME/$_hostKey').onValue.map((event){
-      final gameMap = event.snapshot.value as Map<String, dynamic>;
-      _currentGame = GameRoom.fromRTDB(id: _hostKey, data: gameMap);
-      _playerList =  (gameMap[PLAYER] as Map<String, dynamic>).entries.map((el){
-        String id = el.key.toString();
-        Map<String, dynamic> data = el.value ?? {};
-        return Player.fromRTDB(id: id, data: data);
-      }).toList();
+    // 2. if game is not over, update currentGame, playerList
+    if(!_currentGame.isOver){
+      Stream<GameRoom> gameStream = _database.child('$GAME/$_hostKey').onValue.map((event){
+        final gameMap = event.snapshot.value as Map<String, dynamic>;
+        _currentGame = GameRoom.fromRTDB(id: _hostKey, data: gameMap);
+        _playerList =  (gameMap[PLAYER] as Map<String, dynamic>).entries.map((el){
+          String id = el.key.toString();
+          Map<String, dynamic> data = el.value ?? {};
+          return Player.fromRTDB(id: id, data: data);
+        }).toList();
 
-      _playerList.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-      _playerList.forEach((element) {print('player: ${element.id} ${element.timestamp.toString()}');});
+        _playerList.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+        _playerList.forEach((element) {print('player: ${element.id} ${element.timestamp.toString()}');});
 
+        print('gameMap: $gameMap');
+        print('currentPlayerId : ${_currentGame.currentPlayerId}');
 
-      print('gameMap: $gameMap');
-      print('currentPlayerId : ${_currentGame.currentPlayerId}');
+        return _currentGame;
+      });
+      return gameStream;
+    }
+    else{
+      // 3. if game is over, update just playerList
+      StreamController<GameRoom> controller = StreamController<GameRoom>();
+      _database.child('$GAME/$_hostKey/$PLAYER').once().then((event){
+        final playerMap = event.snapshot.value as Map<String, dynamic>;
+        _playerList =  playerMap.entries.map((el){
+          String id = el.key.toString();
+          Map<String, dynamic> data = el.value ?? {};
+          return Player.fromRTDB(id: id, data: data);
+        }).toList();
+      });
+      controller.add(_currentGame);
+      return controller.stream;
+    }
+  }
 
-      notifyListeners(); // Notify listeners after processing the data
-      return _currentGame;
-    });
-    final userStream = _database.child('$USER/$_uid').onValue.map((event){
-      final userMap = event.snapshot.value as Map<String, dynamic>;
-      _isHost = userMap['isHost'] ?? false;
-    });
-    return gameStream;
+  Stream<Player> searchWinnerStream(){
+    print('====searchWinnerStream=====');
+    print('hostkey: $_hostKey');
+
+    StreamController<Player> controller = StreamController<Player>();
+    controller.add(_playerList.firstWhere((element) => element.step>=40, orElse: ()=>Player.fromRTDB(data:{})));
+    _playerList.forEach((element) {print('player: ${element.id} ${element.step.toString()}');});
+
+    return controller.stream;
   }
 
   Future<String> createGame(String code, int num, int time) async{
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
     final newHostKey = _database.child(GAME).push().key;
     print('====createGame=====');
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
 
-    _isHost = true;
+    _hostKey = newHostKey.toString();
+    _currentGame = GameRoom.fromRTDB(id: 'createGame', data: {});
+    _playerList = List.generate(num, (index) => Player.fromRTDB(data:{}));
 
     int QNum = time~/num;
 
@@ -138,31 +162,40 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<String> createPlayer(String hostKey) async{
-    print('====createPlayer=====');
-    print('hostkey: $hostKey');
-    final String _uid = FirebaseAuth.instance.currentUser!.uid;
-
     if (!_loggedIn) {
       throw Exception('Must be logged in');
     }
+    print('====createPlayer=====');
+    print('hostkey: $hostKey');
 
-    _hostKey = hostKey;
+    //hostkey를 기준으로 다시한번 해보기 4시전에는 최종배포
+    final String _uid = FirebaseAuth.instance.currentUser!.uid;
+    final pData = Player.fromRTDB(id:'createPlayer', data: {'name': FirebaseAuth.instance.currentUser!.displayName.toString(),});
+    Map<String, dynamic> userMap = {};
 
-    final data = Player.fromRTDB(id:'createPlayer', data:
-    {
-      'name': FirebaseAuth.instance.currentUser!.displayName.toString(),
-    });
+    if(_hostKey != ''){
+      userMap = {
+        'hostKey': _hostKey,
+        'isHost': true,
+        'timestamp': pData.timestamp.microsecondsSinceEpoch,
+      };
+    }else{
+      _hostKey = hostKey;
+      userMap = {
+        'hostKey': _hostKey,
+        'isHost': false,
+        'timestamp': pData.timestamp.microsecondsSinceEpoch,
+      };
 
-    final user = {
-      'hostKey': _hostKey,
-      'isHost': _isHost,
-      'timestamp': data.timestamp.microsecondsSinceEpoch,
+    }
+
+    _isHost = userMap['isHost'];
+    print('user: $userMap');
+
+    final Map<String, Map> updates = {
+      '/$GAME/$hostKey/$PLAYER/$_uid': pData.toMap(),
+      '/$USER/$_uid': userMap
     };
-
-    print('player: ${data.toMap()}');
-    final Map<String, Map> updates = {};
-    updates['/$GAME/$hostKey/$PLAYER/$_uid'] = data.toMap();
-    updates['/$USER/$_uid'] = user;
 
     //set currentGame and players
     try{
@@ -199,8 +232,11 @@ class ApplicationState extends ChangeNotifier {
   Future<void> removeGameRoom() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-    await _database.child('$USER/$_uid/$_hostKey').remove();
+    await _database.child('$USER/$_uid').remove();
     await _database.child('$GAME/$_hostKey').remove();
+
+    _hostKey = '';
+    _playerList = List.generate(0, (index) => Player.fromRTDB(data:{}));
 
     notifyListeners();
   }
@@ -208,8 +244,11 @@ class ApplicationState extends ChangeNotifier {
   Future<void> removePlayer() async{
     final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-    await _database.child('$USER/$_uid/$_hostKey').remove();
+    await _database.child('$USER/$_uid').remove();
     await _database.child('$GAME/$_hostKey/$PLAYER/$_uid').remove();
+
+    _hostKey = '';
+    _playerList = List.generate(0, (index) => Player.fromRTDB(data:{}));
 
     notifyListeners();
   }
@@ -256,13 +295,9 @@ class ApplicationState extends ChangeNotifier {
 
     _playerList[index].step = totalStep;
 
-    if(totalStep >= 40){
-      _currentGame.isOver = !_currentGame.isOver;
-    }
-
     final updates = {
       '$GAME/$_hostKey/$PLAYER/$_uid': _playerList[index].toMap(),
-      '$GAME/$_hostKey/isOver': _currentGame.isOver,
+      '$GAME/$_hostKey/isOver': (_playerList[index].step >= 40) ? true: false,
     };
 
     print('updates: $updates');
@@ -288,6 +323,7 @@ class ApplicationState extends ChangeNotifier {
       return true;
     }else{
       _playerList[index].answeredQNum++;
+      print('name: ${_playerList[index].name}, answeredQNum: ${_playerList[index].answeredQNum}');
     }
 
     // 2. get Question message
@@ -323,7 +359,7 @@ class ApplicationState extends ChangeNotifier {
       _playerList.map((player) => MapEntry(player.id, player.toMap())),
     );
 
-    final Map<String, dynamic> updates = {'$GAME/$_hostKey/players': playerMap};
+    final Map<String, dynamic> updates = {'$GAME/$_hostKey/$PLAYER': playerMap};
     print('updates: $updates');
     try{
       await _database.update(updates);
@@ -355,15 +391,9 @@ class ApplicationState extends ChangeNotifier {
     print('isReady function error...');
     return false;
   }
-  Player getWinnerPlayer(List<Player> currentPlayers){
-    currentPlayers.sort((a, b) => b.step.compareTo(a.step));
-    return currentPlayers.first;
-  }
   Future<void> sendOpinion(String text) async {
     final newOpinion = _database.child('text').push().key;
-    final Map<String,dynamic> updates = {};
-    updates['/text'] = {'$newOpinion': text};
-
+    final Map<String,dynamic> updates = {'/text/$newOpinion': text};
     print('updates: $updates');
     try{
       await _database.update(updates);

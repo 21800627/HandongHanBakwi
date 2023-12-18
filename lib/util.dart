@@ -33,35 +33,34 @@ OverlayEntry? _exit_overlayEntry;
 OverlayEntry? chanceOverlayEntry;
 OverlayEntry? qCardOverlayEntry;
 
+OverlayEntry _qCardBuilder(String korean, String english) {
+  return OverlayEntry(
+    builder: (BuildContext context) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          OutlinedButton(
+            onPressed: hideQCardOverlay,
+            child: const Icon(
+              Icons.close,
+            ),
+          ),
+          QCard(
+            koreanMessage: korean,
+            englishMessage: english,
+          ),
+        ],
+      );
+    },
+  );
+}
+
 void showQCardOverlay(BuildContext context, String korean, String english) {
-  if(qCardOverlayEntry == null){
-    qCardOverlayEntry = OverlayEntry(
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.white,
-              ),
-              onPressed: hideQCardOverlay,
-              child: const Icon(
-                Icons.close,
-              ),
-            ),
-            QCard(
-              koreanMessage: korean,
-              englishMessage: english,
-            ),
-          ],
-        );
-      },
-    );
-    // Insert the OverlayEntry after the current build is complete.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Overlay.of(context).insert(qCardOverlayEntry!);
-    });
-  }
+  Future.delayed(Duration.zero,() =>
+    qCardOverlayEntry = _qCardBuilder(korean, english)
+  ).then((value) =>
+      Overlay.of(context).insert(qCardOverlayEntry!)
+  );
 }
 
 
@@ -169,6 +168,7 @@ void exitOnPressed(context, appState){
 }
 Future<void> exitGameRoom(BuildContext context, appState) async {
   try{
+    hideQCardOverlay();
     if(appState.isHost){
       appState.removeGameRoom().then((value){
         context.go('/');
